@@ -1,0 +1,188 @@
+---
+title: "Homework 1"
+subtitle: "MA 590 Special Topics: Causal Inference"
+author: "Aukkawut Ammartayakun"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+    pdf_document:
+        includes:
+            in_header: "preamble.tex"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The goal here is to get familiar with R: working with data and running regressions.
+First step: download the "acsMASS" dataset from [this link](https://drive.google.com/file/d/1iEDERMkh9Op6kprfVgcfZ-D0RnYgGLEe/)
+and save it in the same folder as this file. 
+
+Then load it into R like so:
+```{r cars}
+acs <- read.csv('acsMASS.csv')
+```
+Alternatively, you can save the file anywhere you want and put the entire filepath into `read.csv`.
+
+This is a subset of the American Community Survey consisting of people from Massachusetts. 
+
+Here's what the first few rows look like:
+```{r head}
+head(acs)
+```
+
+## Working with datasets
+
+One way to see what's in a dataset is the `summary()` command:
+```{r}
+summary(acs)
+```
+
+There are basically two ways of accessing elements of a dataframe (as `R` refers to datasets).
+1. Treating them like a matrix
+```{r matrix}
+acs[3,2] ## gives the 2nd element of the 3rd row
+acs[3,] ## gives the entire third row
+age <- acs[,11] ## gives the 11th column
+head(age)
+```
+(If you just call a command, `R` will print out the result to the console. If you assign the result 
+to some character string using `<-` or `=`--as above--then you create a named object
+that you can access later.)
+
+2. Using the `$`
+```{r}
+Age = acs$age
+```
+
+Test equality using a double equal sign
+```{r}
+Age[1]==age[1]
+all(Age==age)
+```
+
+
+To subset, use the `subset()` command
+```{r}
+worcester <- subset(acs,metroArea=="Worcester")
+head(worcester)
+
+minor <- subset(acs,age<18)
+head(minor)
+```
+
+### Problem 1
+
+a) Create a subset of `acs` consisting of only people with no high school diploma (see the variable `educ`). Using the `nrow` command, how many rows does it have?
+```{r prob1}
+## put the code for your answer here
+nhsp <- subset(acs,educ=="no HS")
+nrow(nhsp)
+```
+b) How many people in the dataset have an income greater than or equal to one million dollars?
+(hint: make a subset of the data and use `nrow`... or do it another way)
+```{r}
+## put the code for your answer here
+filthyrich <- subset(acs,income>=1000000)
+nrow(filthyrich)
+```
+
+
+## Simple functions
+`sum()`, `mean()`, `sd()`, `var()` do what you think they do. However, if there are NAs, they 
+will return NA. To have them ignore the NA values, include the optional argument `na.rm=TRUE`.
+
+```{r}
+mean(acs$income)
+mean(acs$income, na.rm=TRUE)
+sd(acs$income,na.rm=TRUE)
+```
+If a variable is logical (i.e. `TRUE` or `FALSE`) then `sum()` will give the number of `TRUE`s
+and `mean()` will give the proportion of `TRUE`s
+
+```{r}
+sum(acs$deaf,na.rm=TRUE)
+mean(acs$deaf,na.rm=TRUE)
+mean(minor$deaf,na.rm=TRUE)
+```
+
+### Problem 2
+a) What is the mean income (excluding NAs) of people with no HS diploma?
+```{r}
+## put the code for your answer here
+mean(nhsp$income,na.rm=TRUE)
+```
+
+b) What is the standard deviation (`sd()`) of income among people whose income was at least a million? What about people whose income is less than $100,000?
+```{r}
+## put the code for your answer here
+print(sd(filthyrich$income,na.rm=TRUE))
+print(sd(subset(acs,income<100000)$income,na.rm=TRUE))
+```
+
+## Regression
+Ordinary least squares linear regression uses the `lm()` command.
+To fit the model, say, 
+$$income_i=\beta_0+\beta_1age_i+\epsilon_i$$
+run the code:
+```{r}
+mod1=lm(income~age,data=acs)
+summary(mod1)
+```
+If you include a categorical predictor, `R` will automatically choose a reference category (the first alphabetically) and include dummy variables for the other categories:
+```{r}
+mod2=lm(income~age+educ,data=acs)
+summary(mod2)
+```
+To see a plot of residuals versus fitted values, run:
+```{r}
+plot(mod2,which=1)
+```
+
+You can also include transformations:
+```{r} 
+mod3 <- lm(log(income)~age+educ,data=subset(acs,income>0))
+summary(mod3)
+plot(mod3,which=1)
+```
+
+
+### Problem 3
+Regress log income on `age`, `metroArea`, and `deaf`, print out a regression table (`summary()`), and plot residulas versus fitted values. 
+
+```{r}
+## put the code for your answer here
+mod4 <- lm(log(income)~age+metroArea+deaf,data=subset(acs,income>0))
+summary(mod4)
+plot(mod4,which=1)
+```
+
+
+## Logistic regression
+When the dependent variable in a regression is binary, you can use logistic regression, like so:
+```{r}
+logit1 <- glm(deaf~age+vet,data=acs,family=binomial(logit))
+summary(logit1)
+```
+To get predicted probabilities, use `predict()` function with `type="response"`
+```{r}
+head(predict(logit1,type="response"))
+```
+     
+## Problem 4
+Using logistic regression, predict whether someone is in groupQuarters as a function of their age, income, and education. Print out the regression summary. What are the first six predicted probabilities?
+
+```{r}
+## put the code for your answer here
+logit2 <- glm(groupQuarters~age+income+educ,data=acs,family=binomial(logit))
+print(summary(logit2))
+head(predict(logit2,type="response"))
+```
+
+## Problem 5
+In an experiment with a binary outcome (i.e. $Y=1$ or $0$), write down all of the possible individual treatment effects. Show that the difference in means estimator $\bar{Y}_{Z=1}-\bar{Y}_{Z=0}$ is an unbiased estimator for the difference between the sample proportion of subjects with $\tau_i=1$ and the sample proportion of subjects with $\tau_i=-1$. 
+
+### Solution
+$\tau_i = 1$ implies that $Y_i(Z_i) = 1$ and $Y_i(\neg Z_i) = 0$. That means, we want to show that $\bar{Y}_{Z=1}-\bar{Y}_{Z=0}$ is an unbiased estimator for $p^+ - p^-$ where $p^+$ is the sample proportion subject to positive treatment effects and $p^-$ is the sample proportion subject to negative treatment effects. 
+\\
+T
+
