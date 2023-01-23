@@ -183,6 +183,14 @@ In an experiment with a binary outcome (i.e. $Y=1$ or $0$), write down all of th
 
 ### Solution
 $\tau_i = 1$ implies that $Y_i(Z_i) = 1$ and $Y_i(\neg Z_i) = 0$. That means, we want to show that $\bar{Y}_{Z=1}-\bar{Y}_{Z=0}$ is an unbiased estimator for $p^+ - p^-$ where $p^+$ is the sample proportion subject to positive treatment effects and $p^-$ is the sample proportion subject to negative treatment effects. 
-\\
-T
+
+
+Now, let's look at the definition for $p^+$ and $p^-$, without loss of generality, we can assume that $Z_i = 1$ and $\neg Z_i = 0$ for $i\in \mathcal{T}$ and $Z_i = 0$ and $\neg Z_i = 1$ for $i\in \mathcal{C}$:
+$$p^+ = \frac{1}{n}\sum_{i\in\mathcal{T}}Z_iY_i(1)$$
+$$p^- = \frac{1}{n}\sum_{i\in\mathcal{C}}(1-Z_i)Y_i(0)$$
+
+This can be justified by the fact that $p$ refers to the proportion of subjects with some treatment effect in which we have shown that only one possible $\tau_i$ can be assigned to each subject. Thus, this is similar to difference in the mean example.
+
+Looking back to the definition of $\bar{Y}_{Z=1}$ and $\bar{Y}_{Z=0}$, we can see (shown in the lecture) that $\mathbb{E}(\bar{Y}_{Z=0}) = \mathbb{E}(Y(0)) = p^-$ and $\mathbb{E}(\bar{Y}_{Z=1}) = \mathbb{E}(Y(1)) = p^+$. Therefore, $\bar{Y}_{Z=1}-\bar{Y}_{Z=0}$ is an unbiased estimator for $p^+ - p^-$.
+
 

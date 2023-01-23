@@ -1,0 +1,60 @@
+---
+title: "Homework 2"
+subtitle: "MA 590 Special Topics: Causal Inference"
+author: "Aukkawut Ammartayakun"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+    pdf_document:
+        includes:
+            in_header: "preamble.tex"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Problem 1
+## A
+In a completely randomized experiment in which $n_1 = n_0 = n/2$, say $S_t^2 = S_c^2$ (the sets
+of potential outcomes have the same variance in the experimental sample). What is the
+smallest possible value for the true sampling variance of the difference in means estimator ($\mathbb{V}_{fp}(\hat{\tau}^{diff})$)? Justify your answer (with math)
+
+(*hint: $S^2_{tc} = S^2_{t} + S^2_{c} - 2\rho S_tS_c$, where $\rho = \text{corr}\left\{Y(1),Y(0)\right\}$, the sample correlation of potential outcomes, $S_t = \sqrt{S_t^2}$, and $S_c = \sqrt{S_c^2}$, and recall that $-1 \leq \rho \leq 1$*)
+
+### Solution
+
+something
+
+
+## B
+With $n = 6$ and binary $Y$ , write out a table of potential outcomes for which $\mathbb{V}_{fp}(\hat{\tau}^{diff})$
+attains its lowest value. What is the ATE?
+
+### Solution
+
+something
+
+
+# Problem 2
+In a Bernoulli randomized trial, each subject is randomized between $Z = 1$ and $Z = 0$
+independently. Hence, n0 and n1 are random variables, and since $Pr(n_0 = 0) > 0$ and $Pr(n_1 = 0) > 0$, the difference-in-means estimator is not always defined. (The total
+sample size n remains fixed, not random.) If $\mathbb{E}[Z_i] = Pr(Z_i = 1) = p$ for every subject $i$, show that the following is an unbiased
+estimator for  $\bar{\tau}$:
+$$\hat{\tau}_{IPW} = \frac{1}{n}\sum_{i=1}^n \left\{\frac{Z_iY_i}{p} - \frac{(1-Z_i)Y_i}{1-p}\right\}$$
+(IPW stands for “inverse probability weighted” and will become important when we talk
+about propensity scores.)
+
+### Solution
+
+something
+
+
+# Problem 3
+Had the Lady Tasing Tea experiment been a Bernoulli randomized trial, so that each cup
+would be randomized to tea-first or milk-first independently, what would be the $p$-value
+(using Fisher’s method) had the lady gotten all 8 cups right?
+
+### Solution
+
+something
+
