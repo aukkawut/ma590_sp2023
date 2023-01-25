@@ -23,8 +23,9 @@ smallest possible value for the true sampling variance of the difference in mean
 
 ### Solution
 
-something
-
+Given the expression here, we can say that $\mathbb{V}_{fp}(\hat{\tau}^{diff}) \leq \frac{2S_c^2 + 2S_t^2}{n}$
+In another word, $\mathbb{V}_{fp}(\hat{\tau}^{diff}) \leq \frac{2S^2_{tc} + 2\rho S_tS_c}{n}$. Since $n,S_t,S_c$ and $S_{tc}$ are stictly positive, 
+the minimum of maximum value of $\mathbb{V}_{fp}(\hat{\tau}^{diff})$ is $\frac{2S^2_{tc} - 2S_tS_c}{n}$ (i.e., negative correlation between two outcome). However, if there is no difference or constant treatment in two group. Namely, $y_i(0) = y_i(1), \forall i$, then $\mathbb{V}_{fp}(\hat{\tau}^{diff}) = 0$.
 
 ## B
 With $n = 6$ and binary $Y$ , write out a table of potential outcomes for which $\mathbb{V}_{fp}(\hat{\tau}^{diff})$
@@ -32,12 +33,15 @@ attains its lowest value. What is the ATE?
 
 ### Solution
 
-something
-
+```{r table1, echo=FALSE}
+df <- data.frame (y_1 = c(1,1,1,1,1,1), y_0 = c(0,0,0,0,0,0), Z_i = c(1,1,1,0,0,0))
+df
+```
+ATE in this case would be $\bar{\tau} = 1-1 = 0$.
 
 # Problem 2
 In a Bernoulli randomized trial, each subject is randomized between $Z = 1$ and $Z = 0$
-independently. Hence, n0 and n1 are random variables, and since $Pr(n_0 = 0) > 0$ and $Pr(n_1 = 0) > 0$, the difference-in-means estimator is not always defined. (The total
+independently. Hence, $n_0$ and $n_1$ are random variables, and since $Pr(n_0 = 0) > 0$ and $Pr(n_1 = 0) > 0$, the difference-in-means estimator is not always defined. (The total
 sample size n remains fixed, not random.) If $\mathbb{E}[Z_i] = Pr(Z_i = 1) = p$ for every subject $i$, show that the following is an unbiased
 estimator for  $\bar{\tau}$:
 $$\hat{\tau}_{IPW} = \frac{1}{n}\sum_{i=1}^n \left\{\frac{Z_iY_i}{p} - \frac{(1-Z_i)Y_i}{1-p}\right\}$$
@@ -46,8 +50,11 @@ about propensity scores.)
 
 ### Solution
 
-something
-
+We can see that if $Y_i = Z_iy_i(1) + (1-Z_i)y_i(0)$. Then,
+$$\hat{\tau}_{IPW} =\frac{1}{n}\sum_{i=1}^n \left\{\frac{Z_iy_i(1)}{p} - \frac{(1-Z_i)y_i(0)}{1-p}\right\} $$
+Taking the expectation, we can see that
+$$\mathbb{E}[\hat{\tau}_{IPW}] =\frac{1}{n}\sum_{i=1}^n \left\{\frac{py_i(1)}{p} - \frac{(1-p)y_i(0)}{1-p}\right\}$$
+which turns out to be the ATE or $\bar{\tau}$. Thus, conclude the unbiasness of the estimator.
 
 # Problem 3
 Had the Lady Tasing Tea experiment been a Bernoulli randomized trial, so that each cup
@@ -56,5 +63,5 @@ would be randomized to tea-first or milk-first independently, what would be the 
 
 ### Solution
 
-something
+Let assume that we don't care whether the trial we have will contains both tea-first and milk-first. Then, there are $2^8 = 256$ possible outcomes. Even so, there is only one way to orient the test to match with the given answer. The probability of getting all 8 cups to align with the guessing is $\frac{1}{256}$. Thus, the $p$-value is $\frac{1}{256}$.
 
