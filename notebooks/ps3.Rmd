@@ -1,0 +1,74 @@
+---
+title: "Homework 3"
+subtitle: "MA 590 Special Topics: Causal Inference"
+author: "Aukkawut Ammartayakun"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+    pdf_document:
+        includes:
+            in_header: "preamble.tex"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Problem 1
+Download the file “hintVSexp.csv” from 
+(https://drive.google.com/open?id=15yQCMUNszztQNzyp40pQpmLRNn4z1JV4&authuser
+=acsales%40umich.edu&usp=drive_fs)[this link].
+This is a group of 33 randomized experiments from the ASSISTments online learning 
+platform in which users were randomized to be offered either a multi-step “hint” ($Z = 1$) or 
+an “explanation” as to how to do the problem. The outcome $Y$ is a binary indicator of 
+whether they got the next problem correct or not. Here, we will treat this as one large 
+experiment with 33 blocks, corresponding with particular problems in ASSISTments.
+
+## A
+Use Fisher’s method to estimate a p-value for the sharp null $H^{\text{Fisher}}_0 :y_i(1) = y_i(0)$ for all $i$, and 
+a 95% confidence interval for a constant effect. (As I have mentioned in class, constant 
+effects don’t make sense with binary outcomes. Let’s ignore that problem for now and 
+estimate one anyway.) Use any (valid) test statistic you like.
+
+### Solution
+
+Something
+
+## B
+Use Neyman’s method to estimate a (possibly weighted) average treatment effect ($\tau_w$), with 
+a p-value for the null hypothesis $H^\text{Neyman}_0:\tau_w = 0$ and a 95% confidence interval.
+
+### Solution
+
+Something
+
+# Problem 2
+When dealing with grouped data, in some cases it makes sense to “group-mean-center” the 
+data, i.e. subtract each group’s mean observed outcome (pool treatment and control 
+groups) from each of the group’s outcomes. In other words, conduct analysis on $\tilde{Y_{ij}} = Y_{ij}-\bar{Y_{j}}$, 
+rather than on $Y_{ij}$.
+In a stratified experiment, what effect will group-mean-centering the outcomes within 
+strata have on the (Neyman-style) estimate and standard error?
+In a cluster-randomized experiment, what effect will group-mean-centering the outcomes 
+within cluster have on the (Neyman-style) estimate and (cluster-robust) standard error?
+
+### Solution
+
+Something
+
+# Problem 3
+The “Fisherian” $1-\alpha$ confidence interval consists of all of the hypothetical constant effects $\tau$
+such that the p-value testing the null hypothesis $H_\tau:y_i(1)-y_i(0) = \tau$ is greater than $\alpha$.
+
+Show that this is a valid $1-\alpha$ confidence interval, i.e. that if there is a true $\tau$, the probability 
+of estimating a CI that contains $\tau$ is $1-\alpha$.
+You may take for granted the fact that comparing fisherian p-values to $\alpha$ gives a valid $\alpha$-
+level test, i.e. if you reject the null whenever $p < \alpha$, the probability of falsy rejecting a true 
+null is $\alpha$. (Though I strongly recommend convincing yourself that this is true–you just 
+needn’t write down your argument here.)
+Once you accept that Fisherian $p$-values give you valid $\alpha$-level hypothesis tests, the proof is 
+very simple, like two or three lines. Don’t overthink it.
+
+### Solution
+
+Something
+
