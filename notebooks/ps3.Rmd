@@ -54,7 +54,6 @@ T=replicate(1000,{
   }
   diffMeans(Yperm,data$Z)
 })
-hist(T, main="Histogram of test statistics on permuted data")
 
 #calculate p-value
 p = 2*min(mean(T>=ts),mean(T<=ts))
@@ -80,7 +79,7 @@ DM <- mean(trt$Y)-mean(ctl$Y)
 Vhat <- var(trt$Y)/nrow(trt)+var(ctl$Y)/nrow(ctl)
 SEhat <- sqrt(Vhat)
 
-# 95\%
+# CI:
 c(DM-qnorm(.975)*SEhat,DM+qnorm(.975)*SEhat)
 
 # p-value:
@@ -113,12 +112,13 @@ within cluster have on the (Neyman-style) estimate and (cluster-robust) standard
 
 ### Solution
 
-Let say we do the group-mean-center. In the sense of conducting the analysis of $\tilde{Y_{ij}}$, the variance of the estimated result would be 
-$$
-\mathbb{V}(\hat{\tau}) = \sum_{j=1}^{N} w_j^2 \mathbb{V}(\hat{\tau}_j)
-$$
+Consider the case of stratified experiment. Group-mean-centering the outcomes within strata will have no effect on the Neyman-style estimate as the shifting of the mean of each strata is the same for both treatment and control group.
+However, in the case of standard error, the variance of the Neyman-style in the stratified experiment would change as now the variance for each
+of them are estimated on the subset rather than the whole set where the correlation between the strata are not taken into account. 
+Therefore, the standard error would be smaller than the original one.
 
-where $\tau_j = \frac{1}{n_j}\sum_{i=1}^{n_j} \tilde{Y_{ij, Z = 1}} - \tilde{Y_{ij, Z = 0}}$
+In the cluster-randomized experiment, however, the Neyman-style estimate would not be the same due to the unbiasness of the mean and the standard error would be larger than the original one as
+the Molton's factor are strictly larger than 1.
 
 # Problem 3
 The “Fisherian” $1-\alpha$ confidence interval consists of all of the hypothetical constant effects $\tau$
