@@ -15,14 +15,20 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Problem 1
 Download the file “hintVSexp.csv” from 
-(https://drive.google.com/open?id=15yQCMUNszztQNzyp40pQpmLRNn4z1JV4&authuser
-=acsales%40umich.edu&usp=drive_fs)[this link].
+(https://drive.google.com/open?id=15yQCMUNszztQNzyp40pQpmLRNn4z1JV4&authuser=acsales%40umich.edu&usp=drive_fs)[this link].
 This is a group of 33 randomized experiments from the ASSISTments online learning 
 platform in which users were randomized to be offered either a multi-step “hint” ($Z = 1$) or 
 an “explanation” as to how to do the problem. The outcome $Y$ is a binary indicator of 
 whether they got the next problem correct or not. Here, we will treat this as one large 
 experiment with 33 blocks, corresponding with particular problems in ASSISTments.
-
+```{r}
+#import estimatr package
+library(estimatr)
+#load data
+data <- read.csv("hintVSexp.csv")
+#convert Z to integer
+data$Z <- as.integer(data$Z)
+```
 ## A
 Use Fisher’s method to estimate a p-value for the sharp null $H^{\text{Fisher}}_0 :y_i(1) = y_i(0)$ for all $i$, and 
 a 95% confidence interval for a constant effect. (As I have mentioned in class, constant 
@@ -30,8 +36,34 @@ effects don’t make sense with binary outcomes. Let’s ignore that problem for
 estimate one anyway.) Use any (valid) test statistic you like.
 
 ### Solution
+```{r}
+#define test statistics
+diffMeans=function(Y,Z)
+  mean(Y[Z==1])-mean(Y[Z==0])
+ts=diffMeans(data$Y,data$Z)
+#permutation test for each strata (block)
+#overall test: T=replicate(5000,diffMeans(data$Y,sample(data$Z)))
+T=replicate(1000,{
+  #permutation test for each strata (block)
+  Yperm=rep(NA,nrow(data))
+  for (i in unique(data$block)){
+    #subset data by block
+    data_block <- subset(data,block==i)
+    #permutation test
+    Yperm[data_block$block==i]=sample(data_block$Y)
+  }
+  diffMeans(Yperm,data$Z)
+})
+hist(T, main="Histogram of test statistics on permuted data")
 
-Something
+#calculate p-value
+p = 2*min(mean(T>=ts),mean(T<=ts))
+p
+
+#calculate CI
+CI = quantile(T,c(0.025,0.975))
+CI
+```
 
 ## B
 Use Neyman’s method to estimate a (possibly weighted) average treatment effect ($\tau_w$), with 
@@ -39,7 +71,34 @@ a p-value for the null hypothesis $H^\text{Neyman}_0:\tau_w = 0$ and a 95% confi
 
 ### Solution
 
-Something
+```{r}
+trt <- subset(data,Z==1)
+ctl <- subset(data,Z==0)
+
+DM <- mean(trt$Y)-mean(ctl$Y)
+
+Vhat <- var(trt$Y)/nrow(trt)+var(ctl$Y)/nrow(ctl)
+SEhat <- sqrt(Vhat)
+
+# 95\%
+c(DM-qnorm(.975)*SEhat,DM+qnorm(.975)*SEhat)
+
+# p-value:
+Tneyman <- DM/SEhat
+p=2*pnorm(-abs(Tneyman))
+p
+
+# weighted average treatment effect
+ATE <- 0
+for (i in unique(data$block)){
+  #subset data by block
+  data_block <- subset(data,block==i)
+  #calculate ATE
+  ATE <- ATE + (mean(data_block$Y[data_block$Z==1])-mean(data_block$Y[data_block$Z==0]))*nrow(data_block)
+}
+ATE <- ATE/nrow(data)
+ATE
+```
 
 # Problem 2
 When dealing with grouped data, in some cases it makes sense to “group-mean-center” the 
@@ -53,11 +112,11 @@ within cluster have on the (Neyman-style) estimate and (cluster-robust) standard
 
 ### Solution
 
-Something
+
 
 # Problem 3
 The “Fisherian” $1-\alpha$ confidence interval consists of all of the hypothetical constant effects $\tau$
-such that the p-value testing the null hypothesis $H_\tau:y_i(1)-y_i(0) = \tau$ is greater than $\alpha$.
+such that the $p$-value testing the null hypothesis $H_\tau:y_i(1)-y_i(0) = \tau$ is greater than $\alpha$.
 
 Show that this is a valid $1-\alpha$ confidence interval, i.e. that if there is a true $\tau$, the probability 
 of estimating a CI that contains $\tau$ is $1-\alpha$.
@@ -70,5 +129,4 @@ very simple, like two or three lines. Don’t overthink it.
 
 ### Solution
 
-Something
-
+One can invert the test to see that whether $\tau$ is in the CI (i.e., find the acceptance region) is equivalent to whether $p$ is greater than $\alpha$ (i.e., find the rejection region). Thus, the probability of estimating a CI that contains $\tau$ is $1-\alpha$ which then conclude that the CI is valid as the probability of not rejecting the null hypothesis is at least $1-\alpha$ is hold.
