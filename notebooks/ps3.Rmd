@@ -94,7 +94,8 @@ for (i in unique(data$block)){
   #subset data by block
   data_block <- subset(data,block==i)
   #calculate ATE
-  ATE <- ATE + (mean(data_block$Y[data_block$Z==1])-mean(data_block$Y[data_block$Z==0]))*nrow(data_block)
+  ATE <- ATE + (mean(data_block$Y[data_block$Z==1])-
+  mean(data_block$Y[data_block$Z==0]))*nrow(data_block)
 }
 ATE <- ATE/nrow(data)
 ATE
