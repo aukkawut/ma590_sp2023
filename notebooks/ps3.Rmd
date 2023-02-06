@@ -130,4 +130,7 @@ very simple, like two or three lines. Don’t overthink it.
 
 ### Solution
 
-One can invert the test to see that whether $\tau$ is in the CI (i.e., find the acceptance region) is equivalent to whether $p$ is greater than $\alpha$ (i.e., find the rejection region). Thus, the probability of estimating a CI that contains $\tau$ is $1-\alpha$ which then conclude that the CI is valid as the probability of not rejecting the null hypothesis is at least $1-\alpha$ is hold.
+One can invert the test to see that whether $\tau$ is in the CI (i.e., find the acceptance region) is equivalent 
+to whether $p$ is greater than $\alpha$ (i.e., find the rejection region). Thus, the probability of estimating a 
+CI that contains $\tau$ is $1-\alpha$ which then conclude that the CI is valid as the probability of not rejecting 
+the null hypothesis is at least $1-\alpha$ is hold.
