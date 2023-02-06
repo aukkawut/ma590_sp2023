@@ -113,7 +113,12 @@ within cluster have on the (Neyman-style) estimate and (cluster-robust) standard
 
 ### Solution
 
+Let say we do the group-mean-center. In the sense of conducting the analysis of $\tilde{Y_{ij}}$, the variance of the estimated result would be 
+$$
+\mathbb{V}(\hat{\tau}) = \sum_{j=1}^{N} w_j^2 \mathbb{V}(\hat{\tau}_j)
+$$
 
+where $\tau_j = \frac{1}{n_j}\sum_{i=1}^{n_j} \tilde{Y_{ij, Z = 1}} - \tilde{Y_{ij, Z = 0}}$
 
 # Problem 3
 The “Fisherian” $1-\alpha$ confidence interval consists of all of the hypothetical constant effects $\tau$
