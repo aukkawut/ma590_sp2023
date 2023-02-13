@@ -1,0 +1,14 @@
+---
+title: "Homework 4"
+subtitle: "MA 590 Special Topics: Causal Inference"
+author: "Aukkawut Ammartayakun"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+    pdf_document:
+        includes:
+            in_header: "preamble.tex"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
