@@ -30,7 +30,7 @@ Choose a model other than OLS to model potential outcomes as a function of covar
 
 # Problem 5
 
-Estimate the ATE, with a 95% confidence interval using LOOP with the default "random forest" predictions. Use p=Pr(Z=1)=0.5.
+Estimate the ATE, with a 95% confidence interval using LOOP with the default "random forest" predictions. Use $p=Pr(Z=1)=0.5$.
 
 # Problem 6
 
