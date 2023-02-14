@@ -12,3 +12,30 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+# Problem 1
+
+Estimate the ATE, with a 95% confidence interval, using Neyman's method, without any covariate adjustment.
+
+# Problem 2
+
+Estimate the ATE, with a 95% confidence interval, using OLS regression with "robust" standard errors (i.e. lm_robust). Include covariates in the regression--your choice which ones, or if you want to do anything fancy to them (e.g. include interactions between covariates, non-linear terms, etc.). Why is or isn't it OK to us OLS with a binary outcome?
+
+# Problem 3
+
+Estimate the ATE, with a 95% confidence interval, using Lin (2012)'s method. Same deal with covariates as in part 2. 
+
+# Problem 4
+
+Choose a model other than OLS to model potential outcomes as a function of covariates, and use it to estimate the ATE with a 95% confidence interval, following Guo and Basse (2020)'s method. 
+
+# Problem 5
+
+Estimate the ATE, with a 95% confidence interval using LOOP with the default "random forest" predictions. Use p=Pr(Z=1)=0.5.
+
+# Problem 6
+
+Estimate the the number of correct responses attributable to assignment to hints (vs explanations) using Hansen & Bowers (2008) method. We barely discussed this one in class, but check it out in the lecture notes and at the bottom of a newly-revised covariateAdjustment.r. 
+
+# Problem 7
+
+Comment on what you found--did the estimates largely agree? Did covariate adjustment seem to help? Do you believe some answers more than others? If you had to choose one estimate of all six to include in a report, which would you choose, and why?
