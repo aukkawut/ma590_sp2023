@@ -11,30 +11,94 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(estimatr)
+library(loop.estimator)
+#load data, first column is index
+data <- read.csv("HintVsExpCov.csv", header = TRUE)
+#convert Z to integer
+data$Z <- as.integer(data$Z)
+#remove index
+data <- data[,-1]
 ```
 # Problem 1
 
 Estimate the ATE, with a 95% confidence interval, using Neyman's method, without any covariate adjustment.
 
-# Problem 2
+```{r}
+#Neyman's method,vcoefficient of Z is the ATE
+sls <- lm(Y~., data = data)
+summary(sls)
+#find confidence interval
+confint(sls)
+```
+# Problem 2 
 
 Estimate the ATE, with a 95% confidence interval, using OLS regression with "robust" standard errors (i.e. lm_robust). Include covariates in the regression--your choice which ones, or if you want to do anything fancy to them (e.g. include interactions between covariates, non-linear terms, etc.). Why is or isn't it OK to us OLS with a binary outcome?
+```{r}
+#OLS with robust standard errors
+rbls <- lm_robust(Y~., data = data)
+summary(rbls)
+#find confidence interval
+confint(rbls)
+```
 
 # Problem 3
 
 Estimate the ATE, with a 95% confidence interval, using Lin (2012)'s method. Same deal with covariates as in part 2. 
+```{r}
+#Lin's method
+data_lin = data
+#scale everything except for Z
+data_lin[,2:ncol(data_lin)] <- scale(data_lin[,2:ncol(data_lin)])
+reg0 = lm(Y~. - Z, data = data_lin, subset = Z==0)
+reg1 = lm(Y~. - Z, data = data_lin, subset = Z==1)
+y0 = predict(reg0, newdata=data)
+y1 = predict(reg1, newdata=data)
+#ATE
+ATE = mean(y1-y0)
+ATE
+#CI
+mean(y1-y0) + t.test(residuals(reg1), residuals(reg0))$conf.int
+```
 
 # Problem 4
 
 Choose a model other than OLS to model potential outcomes as a function of covariates, and use it to estimate the ATE with a 95% confidence interval, following Guo and Basse (2020)'s method. 
+```{r}
+#Guo and Basse's method, using random forest
 
+
+```
 # Problem 5
 
 Estimate the ATE, with a 95% confidence interval using LOOP with the default "random forest" predictions. Use $p=Pr(Z=1)=0.5$.
 
+```{r}
+X = model.matrix(~.-Z, data = data)
+#estimate the proportion of Z=1
+p = mean(data$Z)
+tau.loop = loop(data$Y, data$Z, X, p=p) #tau, var
+tau.loop[1]
+#CI
+c(tau.loop[1] - 1.96*sqrt(tau.loop[2]),tau.loop[1] + 1.96*sqrt(tau.loop[2]))
+```
 # Problem 6
 
 Estimate the the number of correct responses attributable to assignment to hints (vs explanations) using Hansen & Bowers (2008) method. We barely discussed this one in class, but check it out in the lecture notes and at the bottom of a newly-revised covariateAdjustment.r. 
+
+```{r}
+#Hansen and Bowers's method
+#logistic regression to model Y as a function of covariates in Z = 0
+reg0 = glm(Y~., data = data, subset = Z==0, family = binomial)
+#get predicted outcome for the whole sample
+ypred = predict(reg0, newdata=data, type="response")
+#estimate attributable effect
+(ae = sum(data$Y-ypred))
+resids=ypred[data$Z==0]-data$Y[data$Z==0]
+sum(resids)
+#confidence interval
+ae + nrow(data)*t.test(resids)$conf.int
+```
 
 # Problem 7
 
