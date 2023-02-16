@@ -25,21 +25,25 @@ data <- data[,-1]
 Estimate the ATE, with a 95% confidence interval, using Neyman's method, without any covariate adjustment.
 
 ```{r}
-#Neyman's method,vcoefficient of Z is the ATE
+#Neyman's method, coefficient of Z is the ATE
 sls <- lm(Y~., data = data)
 summary(sls)
 #find confidence interval
 confint(sls)
+#find difference of confidence interval of ATE
+confint(sls)[2,2] - confint(sls)[2,1]
 ```
 # Problem 2 
 
 Estimate the ATE, with a 95% confidence interval, using OLS regression with "robust" standard errors (i.e. lm_robust). Include covariates in the regression--your choice which ones, or if you want to do anything fancy to them (e.g. include interactions between covariates, non-linear terms, etc.). Why is or isn't it OK to us OLS with a binary outcome?
 ```{r}
-#OLS with robust standard errors
-rbls <- lm_robust(Y~., data = data)
-summary(rbls)
+#OLS with robust standard errors, with covariates of avg_attempted
+sls <- lm_robust(Y~Z + avg_attempted, data = data)
+summary(sls)
 #find confidence interval
-confint(rbls)
+confint(sls)
+#find range of confidence interval of ATE
+confint(sls)[2,2] - confint(sls)[2,1]
 ```
 
 # Problem 3
@@ -48,39 +52,63 @@ Estimate the ATE, with a 95% confidence interval, using Lin (2012)'s method. Sam
 ```{r}
 #Lin's method
 data_lin = data
-#scale everything except for Z
-data_lin[,2:ncol(data_lin)] <- scale(data_lin[,2:ncol(data_lin)])
-reg0 = lm(Y~. - Z, data = data_lin, subset = Z==0)
-reg1 = lm(Y~. - Z, data = data_lin, subset = Z==1)
-y0 = predict(reg0, newdata=data)
-y1 = predict(reg1, newdata=data)
+#scale avg_attempted
+data_lin$avg_attempted = scale(data_lin$avg_attempted)
+#truncate the data to only include response, covariates, and treatment
+data_lin = data_lin[,c(1,2,4)]
+reg0 = lm(Y~avg_attempted, data = data_lin, subset = Z==0)
+reg1 = lm(Y~avg_attempted, data = data_lin, subset = Z==1)
+#regression only on covariates
+y0 = predict(reg0, newdata=data_lin)
+y1 = predict(reg1, newdata=data_lin)
 #ATE
 ATE = mean(y1-y0)
 ATE
 #CI
 mean(y1-y0) + t.test(residuals(reg1), residuals(reg0))$conf.int
+#diff of CI
+(mean(y1-y0) + t.test(residuals(reg1), residuals(reg0))$conf.int)[2] - 
+(mean(y1-y0) + t.test(residuals(reg1), residuals(reg0))$conf.int)[1]
 ```
 
 # Problem 4
 
 Choose a model other than OLS to model potential outcomes as a function of covariates, and use it to estimate the ATE with a 95% confidence interval, following Guo and Basse (2020)'s method. 
 ```{r}
-#Guo and Basse's method, using random forest
+#Guo and Basse's method
+dat=data[,c(1,2,4)]
+reg1zero=glm(Y~avg_attempted,data=data,subset=Z==1,family=binomial)
+reg1=lm(Y~avg_attempted,data=data,subset=Z==1&Y>0)
+y1hat = predict(reg1zero,newdata=dat,type='response')*predict(reg1,newdata=dat)
+y1hat=y1hat-mean(y1hat[dat$Z==1])+mean(dat$avg_attempted[dat$Z==1])
+reg0zero=glm(Y~avg_attempted,data=data,subset=Z==0,family=binomial)
+reg0=lm(Y~avg_attempted,data=data,subset=Z==0&Y>0)
+y0hat=predict(reg0zero,newdata=dat,type='response')*predict(reg0,newdata=dat)
+y0hat=y0hat-mean(y0hat[dat$Z==0])+mean(dat$avg_attempted[dat$Z==0])
 
+resid1=dat$avg_attempted[dat$Z==1]-y1hat[dat$Z==1]
+resid0=dat$avg_attempted[dat$Z==0]-y0hat[dat$Z==0]
 
+(tau.hat=mean(y1hat-y0hat))
+(ci=tau.hat+t.test(resid1,resid0)$conf.int)
+(ci[2]-ci[1])
 ```
 # Problem 5
 
 Estimate the ATE, with a 95% confidence interval using LOOP with the default "random forest" predictions. Use $p=Pr(Z=1)=0.5$.
 
 ```{r}
-X = model.matrix(~.-Z, data = data)
+#define design matrix with covariates
+X = model.matrix(~avg_attempted, data = data)
 #estimate the proportion of Z=1
 p = mean(data$Z)
 tau.loop = loop(data$Y, data$Z, X, p=p) #tau, var
 tau.loop[1]
 #CI
-c(tau.loop[1] - 1.96*sqrt(tau.loop[2]),tau.loop[1] + 1.96*sqrt(tau.loop[2]))
+CI = c(tau.loop[1] - 1.96*sqrt(tau.loop[2]),tau.loop[1] + 1.96*sqrt(tau.loop[2]))
+CI
+#range of CI
+CI[2] - CI[1]
 ```
 # Problem 6
 
@@ -89,8 +117,10 @@ Estimate the the number of correct responses attributable to assignment to hints
 ```{r}
 #Hansen and Bowers's method
 #logistic regression to model Y as a function of covariates in Z = 0
-reg0 = glm(Y~., data = data, subset = Z==0, family = binomial)
+reg0 = glm(Y~Z+avg_attempted, data = data, subset = Z==0, family = binomial)
 #get predicted outcome for the whole sample
+#truncate the data 
+data = data[,c(1,2,4)]
 ypred = predict(reg0, newdata=data, type="response")
 #estimate attributable effect
 (ae = sum(data$Y-ypred))
@@ -98,8 +128,16 @@ resids=ypred[data$Z==0]-data$Y[data$Z==0]
 sum(resids)
 #confidence interval
 ae + nrow(data)*t.test(resids)$conf.int
+#range of CI
+(ae + nrow(data)*t.test(resids)$conf.int)[2] - 
+(ae + nrow(data)*t.test(resids)$conf.int)[1]
 ```
 
 # Problem 7
 
 Comment on what you found--did the estimates largely agree? Did covariate adjustment seem to help? Do you believe some answers more than others? If you had to choose one estimate of all six to include in a report, which would you choose, and why?
+
+## Solution
+
+The result here are largely agree with each other that hint negatively impact to students. The covariate adjustment help tighten the confidence interval and since there are 3 majorly agree with each other, so three of those would be the reasonable one to trust. It is quite clear that the tighest confidence interval (that largely agree) would be the one to pick because
+it shows that the model is tightly fitted to the data. The confidence interval of the Lin's method is the tighest one, so I would choose the Lin's method.

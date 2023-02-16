@@ -7,6 +7,15 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{indentfirst}
+%define theorem environments
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{example}{Example}
+\newtheorem{remark}{Remark}
+\newtheorem{assumption}{Assumption}
 \title{Causality with Deep Learning}
 \author{Proposal\\Aukkawut Ammartayakun\\MA 590 Special Topics: Causal Inference}
 \date{Spring 2023}
@@ -55,13 +64,34 @@ ASSISTments dataset\cite{assistment} will be explored in various aspects.
     deep learning model mainly aims to classify whether to reject the null hypothesis 
     (whether A has an effect on B) or not.
 \end{enumerate}
+\section{Goal}
 
-\section{Possible way}
+To apply the exploited homogenity test to test whether the result from the treatment group and outcome group
+are homogenious or not. If the result is not homogenious, then the treatment group has an effect on the outcome group.
+\section{Literature Review}
 
-Let say we use a Siamese network
-$$L(\mathbf{x}_1, \mathbf{x}_2, y) = \frac{1}{2}(1-y)d(\mathbf{x}_1, \mathbf{x}_2)^2 + \frac{1}{2}yd(\mathbf{x}_1, \mathbf{x}_2)^2
-$$
-with a metric $d(\mathbf{x}_1, \mathbf{x}_2)$
+\subsection{Explotation on $f$-divergence}
+
+\begin{definition}
+Let $p(x)$ and $q(x)$ be two probability distributions such that $q(x) > 0$ for all $x$ and 
+let $f$ be a function that is convex and satisfies $f(0)=0$. Then, $f$-divergence is defined as
+\begin{equation}
+    D_f(p||q) = \int p(x) f\left(\frac{p(x)}{q(x)}\right) dx
+\end{equation}
+\end{definition}
+One can see that $f$-divergence family would include the KL divergence, Jensen-Shannon divergence, etc.
+With this, one can exploit the $f$-divergence in order for semiparametric homogenity test.
+
+\subsection{Homogenity test}
+
+
+\section{Approach}
+
+\subsection{Prove that the transformation of embedding is sufficient for test statistic}
+\subsection{Prove that the model itself have the same classification power as the hypothesis testing}
+In this path, one can easily show empirically that the type II error rate is the same as the 
+power of the test. However, the problem arise when the prove is needed to be done analytically, 
+which is the main goal of this project.
 
 \bibliographystyle{acm} % We choose the "plain" reference style
 \bibliography{citation.bib} % Entries are in the refs.bib file
