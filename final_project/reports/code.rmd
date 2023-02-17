@@ -1,89 +1,139 @@
 ---
-title: "Final Project Code"
+title: "$n$-Sample Test Classifier on Binary Outcomes of Stratified Randomized Experiments"
 subtitle: "MA 590 Special Topics: Causal Inference"
 author: "Aukkawut Ammartayakun"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-output:
-    pdf_document:
-        includes:
-            in_header: "preamble.tex"
+bibliography: citation.bib
+output:   
+    beamer_presentation:
+        theme: "Berlin"
+        colortheme: "beaver"
+        slide_level: 2
 ---
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  paste0("\n \\", "scriptsize","\n\n", x, "\n\n \\normalsize")
+})
 ```
-    
-# Implementation of Classifier Two-Sample Test (C2ST)[1]
 
-The algorithm itself is to generate the training and testing set of combined dataset (from treatment and control group).
-Then, fit the classifier (like logistic regression) to the training set and predict the testing set. The empirical loss
-should be really close to near-chance level (bootstrap loss) if there is no difference between treatment and control group. 
-```{r}
-# based on https://gist.github.com/oddskool/409018f61d432f10fe00223e2b93cb51
+# Two-Sample Case
+
+Let say we have two group of data $D$: $D_t$ and $D_c$. We want to test whether there is a difference between the two groups. 
+
+## Classifier Two-Sample Test [@c2st]
+
+ - Combined two dataset into one dataset $D$.
+ - Split the dataset into training and testing set.
+ - Fit the classifier (like logistic regression) to the training set and predict the testing set.
+ - Calculate the empirical loss $l_e$ of the classifier. If $|l_e - 0.5| < \epsilon$, then $\bar{\tau} = 0$.
+
+```{r multiple_assignment, include=FALSE}
+# Generic form
+'%=%' = function(l, r, ...) UseMethod('%=%')
+
+# Binary Operator
+'%=%.lbunch' = function(l, r, ...) {
+  Envir = as.environment(-1)
+
+  if (length(r) > length(l))
+    warning("RHS has more args than LHS. Only first", length(l), "used.")
+
+  if (length(l) > length(r))  {
+    warning("LHS has more args than RHS. RHS will be repeated.")
+    r <- extendToMatch(r, l)
+  }
+
+  for (II in 1:length(l)) {
+    do.call('<-', list(l[[II]], r[[II]]), envir=Envir)
+  }
+}
+
+# Used if LHS is larger than RHS
+extendToMatch <- function(source, destin) {
+  s <- length(source)
+  d <- length(destin)
+
+  # Assume that destin is a length when it is a single number and source is not
+  if(d==1 && s>1 && !is.null(as.numeric(destin)))
+    d <- destin
+
+  dif <- d - s
+  if (dif > 0) {
+    source <- rep(source, ceiling(d/s))[1:d]
+  }
+  return (source)
+}
+
+# Grouping the left hand side
+g = function(...) {
+  List = as.list(substitute(list(...)))[-1L]
+  class(List) = 'lbunch'
+  return(List)
+}
+```
+```{r test_train_split, include=FALSE}
 ttsplit <- function(X,y, p = 0.8){
     #test train split
     train <- sample(1:nrow(X), size = floor(p*nrow(X)), replace = FALSE) # 80% of data for training
     test <- setdiff(1:nrow(X), train) # 20% of data for testing
-    X_train <- X[train,]
-    X_test <- X[test,]
-    y_train <- y[train]
-    y_test <- y[test]
+    g(X_train, X_test, y_train, y_test) %=% list(X[train,], X[test,], y[train], y[test])
     return(list(X_train = X_train, X_test = X_test, y_train = y_train, y_test = y_test))
 }
-c2st <- function(X, y, bf = 100){
+```
+
+```{r c2st, include=FALSE}
+# based on https://gist.github.com/oddskool/409018f61d432f10fe00223e2b93cb51
+c2st <- function(X, y, bf = 1000){
     # make sure X is dataframe
     X <- as.data.frame(X)
     # split data into training and testing sets
-    X_train <- ttsplit(X, y)$X_train
-    X_test <- ttsplit(X, y)$X_test
-    y_train <- ttsplit(X, y)$y_train
-    y_test <- ttsplit(X, y)$y_test
-
+    g(X_train, X_test, y_train, y_test) %=% ttsplit(X, y)
     # fit logistic regression model
     model <- glm(y_train ~ ., data = X_train, family = binomial(link = "logit"))
     y_pred <- predict(model, X_test, type = "response")
     y_pred <- ifelse(y_pred > 0.5, 1, 0)
     emp_loss <- mean(y_pred != y_test)
-
-    # bootstrap random target
-    y_bar <- mean(y)
-    bs_losses <- c()
-    for (b in 1:bf){
-        y_random <- rbinom(nrow(X), 1, y_bar)
-        #test train split
-        X_train <- ttsplit(X, y_random)$X_train
-        X_test <- ttsplit(X, y_random)$X_test
-        y_train <- ttsplit(X, y_random)$y_train
-        y_test <- ttsplit(X, y_random)$y_test
-        model <- glm(y_train ~ ., data = X_train, family = binomial(link = "logit"))
-        y_pred <- predict(model, X_test, type = "response")
-        y_pred <- ifelse(y_pred > 0.5, 1, 0)
-        bs_losses <- c(bs_losses, mean(y_pred != y_test))
-    }
-
-    # calculate p-value
-    # TODO: need percentile function
-    pc <- mean(bs_losses >= emp_loss) # wrong...
-    pvalue <- ifelse(pc < y_bar, pc, 1 - pc)
-    return(list(emp_loss = emp_loss, pvalue = pvalue))
+    return(list(emp_loss = emp_loss))
 }
 ```
 
-Let's test the algorithm with the random data.
+## Testing the Algorithm
+Let's test the algorithm with the random homogenity data.
 ```{r}
-#set seed
-set.seed(1337)
+set.seed(590)
+# generate random multivariate gaussian data
 n <- 1000
-X <- data.frame(x1 = rnorm(n,0,1), x2 = rnorm(n,0,1))
-y <- rbinom(n, 1, 0.5)
-c2st(X, y)
+d <- 5
+X <- matrix(rnorm(n*d), n, d)
+# assign target variable, first half is 0, second half is 1
+y <- c(rep(0, n/2), rep(1, n/2))
+c(c2st(X, y)$emp_loss)
 ```
 
+## Testing the Algorithm
+Let's test the algorithm with the random heterogenity data.
 ```{r}
-set.seed(1337)
-n <- 1000
-X <- data.frame(x1 = rnorm(n,2,3), x2 = rexp(n,4))
-y <- rbinom(n, 1, 0.5)
-c2st(X, y)
+set.seed(590)
+# generate two dataset: two gaussians
+n <- 500
+d <- 5
+X0 <- matrix(rnorm(n*d, 0,1), n, d)
+X1 <- matrix(rnorm(n*d, 2,2), n, d)
+# combine two dataset
+X <- rbind(X0, X1)
+y <- c(rep(0, n), rep(1, n))
+c(c2st(X, y)$emp_loss)
 ```
-# Reference
-[1] https://arxiv.org/abs/1905.12837
+
+# Generalization to $n$-Sample Case
+
+## Possible Solution
+
+ - Combine both treatment and control group within each stratum into one dataset $D^{s}_i$.
+ - For each group, fit the classifier (like logistic regression) to the training set and predict the testing set.
+ - Calculate the empirical loss $l_e$ of the classifier. If $|l_e - 0.5| < \epsilon$, then $\bar{\tau}_{\text{within}} = 0$
+ - Find the way to infers $\bar{\tau}_{\text{between}}$
+
+# References
