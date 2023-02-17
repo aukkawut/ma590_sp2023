@@ -2,6 +2,7 @@
 title: "$n$-Sample Test Classifier on Binary Outcomes of Stratified Randomized Experiments"
 subtitle: "MA 590 Special Topics: Causal Inference"
 author: "Aukkawut Ammartayakun"
+institute: "Worcester Polytechinic Institute"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 bibliography: citation.bib
 output:   
