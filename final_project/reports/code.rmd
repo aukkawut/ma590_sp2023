@@ -128,7 +128,7 @@ y <- c(rep(0, n), rep(1, n))
 c(c2st(X, y)$emp_loss)
 ```
 
-# Generalization to $n$-Sample Case
+# Generalization of $n$-Sample Case
 
 ## Possible Solution
 
