@@ -1,0 +1,49 @@
+---
+title: "Homework 5"
+subtitle: "MA 590 Special Topics: Causal Inference"
+author: "Aukkawut Ammartayakun"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+    pdf_document:
+        includes:
+            in_header: "preamble.tex"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Problem 1
+
+Imagine an experiment in which a group of smokers is randomized between two groups: 
+one is encouraged to quit smoking, and the other is not. A year later, subjects in both treatment 
+arms complete a survey asking whether they are still smoking, and they undergo a medical 
+examination to determine the health of their lungs. In this case, receiving the treatment 
+$W =1$ if they quit smoking and $W=0$ if they did not. The health of their lungs is the outcome of interest, $Y$. 
+Describe possible violations of the three instrumental variable assumptions. 
+
+# Problem 2
+If $A, B$, and $C$ are random variables, with $A$ binary, show that 
+$$\frac{\text{cov}(A,B)}{\text{cov}(A,C)} = \frac{\mathbb{E}[B|A=1]-\mathbb{E}[B|A=0]}{\mathbb{E}[C|A=1]-\mathbb{E}[C|A=0]}$$
+You may use the fact that for any two random variables $x$ and $y$, $\text{cov}(x,y) = \mathbb{E}[xy] - \mathbb{E}[x]\mathbb{E}[y]$ 
+
+# Problem 3
+In a randomized trial within a piece of educational software, one random group of student working on a particular 
+math problem are given the option of pushing a button that says "show explanation" that will show them a paragraph 
+explaining how to do the problem, while another group are given the option of pushing on a button that says 
+"show video" that includes a video of a teacher explaining the concepts behind the problem. 
+The outcome of interest is students' performance on the next problem. 
+In both conditions, students may solve the problem without requesting any help. Let $Z_i=1$ if student $i$ is 
+assigned to an explanation and $Z_i=0$ if $i$ is assigned to the video condition. Let $W_i=1$ if student $i$ 
+requested help (be it an explanation or a video, depending on $Z_i$) and 0 otherwise.
+
+## Part A
+What are the principal strata (groups defined based on $w(0)$ and $w(1)$) in this problem?
+
+## Part B
+What would be wrong with estimating average treatment effects using data from only students who 
+requested help by pushing on either the explanation or video button? In what circumstances would this be 
+justifiable?
+
+## Part C
+Assume monotonicity, i.e. $w(1) \geq w(0)$. Give an estimate based on observed $Z$ and $W$ for the proportion 
+of the dataset belonging to each of the four principal strata. 
