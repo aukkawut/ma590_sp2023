@@ -185,11 +185,16 @@ mtext("axis 2", side=2, line=3, col="white", cex=1)
 ```{=latex}
 \pause
 ```
-Now that it is not impossible, the test statistics will diverges from the near-chance.
+Now that it is not impossible, the test statistics will diverge from the near-chance level.
 
 ## Use C2ST on Causal Inference
 
 * But, how can we use C2ST on causal inference?
+
+## Example: 
+
+
+
 
 # Generalization of $n$-Sample Case
 
