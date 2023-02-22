@@ -13,7 +13,8 @@ output:
         colortheme: "dracula"
         highlight: breezedark
         slide_level: 2
-        
+        keep_tex: false
+classoption: aspectratio=169
 ---
 ```{r setup, include=FALSE}
 def.chunk.hook  <- knitr::knit_hooks$get("chunk")
@@ -21,6 +22,8 @@ knitr::knit_hooks$set(chunk = function(x, options) {
   x <- def.chunk.hook(x, options)
   paste0("\n \\", "scriptsize","\n\n", x, "\n\n \\normalsize")
 })
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+library(ggplot2)
 ```
 
 # Two-Sample Case
@@ -111,36 +114,82 @@ c2st <- function(X, y, bf = 1000){
 ```
 
 ## Testing the Algorithm
-Let's test the algorithm with the random homogenity data.
+
+::: columns
+
+:::: column
 ```{r}
 set.seed(590)
 # generate random multivariate gaussian data
-n <- 1000
-d <- 5
+n <- 5000
+d <- 2
 X <- matrix(rnorm(n*d), n, d)
-# assign target variable, first half is 0, second half is 1
 y <- c(rep(0, n/2), rep(1, n/2))
 c(c2st(X, y)$emp_loss)
 ```
+::::
+
+:::: column
+```{r plot1, echo=FALSE}
+# scatter plot of the data colored by the class 
+# class 0: white, class 1: red
+z <- c(rep(3, n/2), rep(4, n/2))
+plot(X, col = z, pch = 19, cex = 0.2)
+box(col="white")
+axis(1, col="white", col.ticks="white", col.axis="white", cex.axis=1)
+axis(2, col="white", col.ticks="white", col.axis="white", cex.axis=1)
+mtext("axis 1", side=1, line=3, col="white", cex=1)
+mtext("axis 2", side=2, line=3, col="white", cex=1)
+```
+::::
+
+:::
+```{=latex}
+\pause
+```
+It is the *impossible* classification problem. Thus, the result should be close to near-chance level.
 
 ## Testing the Algorithm
-Let's test the algorithm with the random heterogenity data.
+::: columns
+
+:::: column
 ```{r}
 set.seed(590)
 # generate two dataset: two gaussians
-n <- 500
-d <- 5
-X0 <- matrix(rnorm(n*d, 0,1), n, d)
-X1 <- matrix(rnorm(n*d, 2,2), n, d)
+n <- 5000
+d <- 2
+X0 <- matrix(rnorm(n*d, 1,0.5), n, d)
+X1 <- matrix(rnorm(n*d, -1,0.5), n, d)
 # combine two dataset
 X <- rbind(X0, X1)
 y <- c(rep(0, n), rep(1, n))
 c(c2st(X, y)$emp_loss)
 ```
+::::
+
+:::: column
+```{r plot2, echo=FALSE}
+# scatter plot of the data colored by the class 
+# class 0: white, class 1: red
+z <- c(rep(3, n), rep(4, n))
+plot(X, col = z, pch = 19, cex = 0.2)
+box(col="white")
+axis(1, col="white", col.ticks="white", col.axis="white", cex.axis=1)
+axis(2, col="white", col.ticks="white", col.axis="white", cex.axis=1)
+mtext("axis 1", side=1, line=3, col="white", cex=1)
+mtext("axis 2", side=2, line=3, col="white", cex=1)
+```
+::::
+
+:::
+```{=latex}
+\pause
+```
+Now that it is not impossible, the test statistics will diverges from the near-chance.
 
 ## Use C2ST on Causal Inference
 
-Let's use the data from 
+* But, how can we use C2ST on causal inference?
 
 # Generalization of $n$-Sample Case
 
