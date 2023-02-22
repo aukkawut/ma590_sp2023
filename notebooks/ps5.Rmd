@@ -25,10 +25,15 @@ Describe possible violations of the three instrumental variable assumptions.
 
 ### Assumption 1: $ITT_W > 0$
 
+They don't have to quit smoking.
+
 ### Assumption 2: $w(1)=w(0)=0 \implies y(1) = y(0) = 0$
+
+If they still smoke or not smoke from the beginning, they might develop lung cancer without the necessity of those treatments.
 
 ### Assumption 3: $w(1) \geq w(0)$
 
+They might quit smoking and then return to smoke again. Although in general, the observable defier in this case would not occur.
 
 # Problem 2
 If $A, B$, and $C$ are random variables, with $A$ binary, show that 
@@ -37,10 +42,16 @@ You may use the fact that for any two random variables $x$ and $y$, $\text{cov}(
 
 ## Solution
 
-$$\begin{aligned}
-\frac{\text{cov}(A,B)}{\text{cov}(A,C)} &= \frac{\mathbb{E}[AB]-\mathbb{E}[A]\mathbb{E}[B]}{\mathbb{E}[AC]-\mathbb{E}[A]\mathbb{E}[C]} \\
-&= \frac{\mathbb{E}[AB] - p\mathbb{E}[B]}{\mathbb{E}[AC] - p\mathbb{E}[C]}\\
-\end{aligned}$$
+From the result from law of total probability, that is
+$$\mathbb{E}[B] = p\mathbb{E}[B|A = 1] + (1-p)\mathbb{E}[B|A = 0]$$
+given that $p = \mathbb{P}(A = 1)$, and from, 
+$$\text{cov}(x,y) = \mathbb{E}[xy] - \mathbb{E}[x]\mathbb{E}[y]$$
+along with the definition of covariance, we have
+$$\text{cov}(A,B) = p\mathbb{E}[(1-p)B|A=1] - (1-p)\mathbb{E}[pB|A=0]$$
+Factorize this to get common factor of $p(1-p)$ which left with the LATE.
+
+
+
 
 
 # Problem 3
@@ -61,8 +72,8 @@ What are the principal strata (groups defined based on $w(0)$ and $w(1)$) in thi
 There are four principal strata: 
 
 - $w(0)=0, w(1)=0$: Students who did not request help in either condition no matter what
-- $w(0)=1, w(1)=0$: Students who requested help in non-video condition
-- $w(0)=0, w(1)=1$: Students who requested help in video condition
+- $w(0)=1, w(1)=0$: Students who requested help but not complies the assignment
+- $w(0)=0, w(1)=1$: Students who requested help complies with the assignment
 - $w(0)=1, w(1)=1$: Students who requested help in both conditions no matter what
 
 
@@ -83,6 +94,6 @@ of the dataset belonging to each of the four principal strata.
 
 ### Solution
 
-If monotonicity is assumed, one can say that there is no defiers in the dataset. 
-In $(w,z) = (0,0)$, there are both compliers and never test. In comparison to $(w,z) = (1,0)$, which only 
-has never test. 
+If monotonicity is assumed, and we know the proportion for each assignment along with the number of people who
+actually uses help, we can say that $\pi_1 = \pi_{W=0}$ and we can also say from monotonicity that $\pi_2 = 0$.
+In the case of $\pi_3$ and $\pi_4$ we know that $\pi_3 + \pi_4 = 1 - \pi_{W=0}$. 
