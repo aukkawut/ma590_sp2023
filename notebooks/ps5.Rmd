@@ -21,10 +21,27 @@ examination to determine the health of their lungs. In this case, receiving the 
 $W =1$ if they quit smoking and $W=0$ if they did not. The health of their lungs is the outcome of interest, $Y$. 
 Describe possible violations of the three instrumental variable assumptions. 
 
+## Solution
+
+### Assumption 1: $ITT_W > 0$
+
+### Assumption 2: $w(1)=w(0)=0 \implies y(1) = y(0) = 0$
+
+### Assumption 3: $w(1) \geq w(0)$
+
+
 # Problem 2
 If $A, B$, and $C$ are random variables, with $A$ binary, show that 
 $$\frac{\text{cov}(A,B)}{\text{cov}(A,C)} = \frac{\mathbb{E}[B|A=1]-\mathbb{E}[B|A=0]}{\mathbb{E}[C|A=1]-\mathbb{E}[C|A=0]}$$
 You may use the fact that for any two random variables $x$ and $y$, $\text{cov}(x,y) = \mathbb{E}[xy] - \mathbb{E}[x]\mathbb{E}[y]$ 
+
+## Solution
+
+$$\begin{aligned}
+\frac{\text{cov}(A,B)}{\text{cov}(A,C)} &= \frac{\mathbb{E}[AB]-\mathbb{E}[A]\mathbb{E}[B]}{\mathbb{E}[AC]-\mathbb{E}[A]\mathbb{E}[C]} \\
+&= \frac{\mathbb{E}[AB] - p\mathbb{E}[B]}{\mathbb{E}[AC] - p\mathbb{E}[C]}\\
+\end{aligned}$$
+
 
 # Problem 3
 In a randomized trial within a piece of educational software, one random group of student working on a particular 
@@ -39,11 +56,33 @@ requested help (be it an explanation or a video, depending on $Z_i$) and 0 other
 ## Part A
 What are the principal strata (groups defined based on $w(0)$ and $w(1)$) in this problem?
 
+### Solution
+
+There are four principal strata: 
+
+- $w(0)=0, w(1)=0$: Students who did not request help in either condition no matter what
+- $w(0)=1, w(1)=0$: Students who requested help in non-video condition
+- $w(0)=0, w(1)=1$: Students who requested help in video condition
+- $w(0)=1, w(1)=1$: Students who requested help in both conditions no matter what
+
+
 ## Part B
 What would be wrong with estimating average treatment effects using data from only students who 
 requested help by pushing on either the explanation or video button? In what circumstances would this be 
 justifiable?
 
+### Solution
+
+The justification is that in this group, $y(1)$ and $y(0)$ are inside the strata and hopefully can determine
+the ATE. However, that does not tell anything because the test is violated.
+
+
 ## Part C
 Assume monotonicity, i.e. $w(1) \geq w(0)$. Give an estimate based on observed $Z$ and $W$ for the proportion 
 of the dataset belonging to each of the four principal strata. 
+
+### Solution
+
+If monotonicity is assumed, one can say that there is no defiers in the dataset. 
+In $(w,z) = (0,0)$, there are both compliers and never test. In comparison to $(w,z) = (1,0)$, which only 
+has never test. 
