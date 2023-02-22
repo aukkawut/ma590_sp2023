@@ -5,11 +5,15 @@ author: "Aukkawut Ammartayakun"
 institute: "Worcester Polytechinic Institute"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 bibliography: citation.bib
+header-includes: 
+    - \setbeamercolor{section name}{fg=draculabg}
 output:   
     beamer_presentation:
-        theme: "Berlin"
-        colortheme: "beaver"
+        theme: "Ilmenau"
+        colortheme: "dracula"
+        highlight: breezedark
         slide_level: 2
+        
 ---
 ```{r setup, include=FALSE}
 def.chunk.hook  <- knitr::knit_hooks$get("chunk")
@@ -96,6 +100,12 @@ c2st <- function(X, y, bf = 1000){
     y_pred <- predict(model, X_test, type = "response")
     y_pred <- ifelse(y_pred > 0.5, 1, 0)
     emp_loss <- mean(y_pred != y_test)
+    #p-val, 2 sided = 2*min(pval, 1-pval)
+    #pval = P(T > t| H0)
+    #T~Binomial(n, 0.5)
+    #P(T > t| H0) = P(T>t and H0)/P(H0)
+
+    #return(list(emp_loss = emp_loss, pval = pval))
     return(list(emp_loss = emp_loss))
 }
 ```
@@ -127,6 +137,10 @@ X <- rbind(X0, X1)
 y <- c(rep(0, n), rep(1, n))
 c(c2st(X, y)$emp_loss)
 ```
+
+## Use C2ST on Causal Inference
+
+Let's use the data from 
 
 # Generalization of $n$-Sample Case
 
