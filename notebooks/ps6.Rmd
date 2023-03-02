@@ -29,38 +29,37 @@ Answer Sue Dynarski's 3 questions, in relation to Ludwig & Miller (2007): What i
 
 - The causal question is whether Head Start program has an effect on child mortality.
 - The ideal experiment is to randomly assign children to Head Start program and non-Head Start program.
-- The identification strategy is to use the difference-in-difference method.
+- The identification strategy is to use the regression discontinuity design (RDD) to estimate the effect of Head Start program on child mortality.
 
 # Problem 2
 Following their general approach, use the dataset [`headstart.csv`](https://canvas.wpi.edu/courses/46357/files/5441395/download?download_frd=1), (more-or-less) replicate their results for Post-Head Start child mortality ages 5-9 (`mort_age59_related_postHS` in the dataset). Don't worry about getting exactly the same answer or model specification as in the paper, but if it's in an entirely different ballpark then maybe something went wrong. 
 
 ## Solution
-
-```{r}
-#scatter plot of poverty rate against child mortality rate
-plot(data$povrate60, data$mort_age59_related_postHS, xlab = "Poverty Rate", ylab = "Child Mortality Rate", main = "Scatter Plot of Poverty Rate against Child Mortality Rate")
-```
-
-```{r}
-#now, on our data
+```{r, warning=FALSE,message=FALSE}
 #cutoff at poverty rate >59.1984
 data$Z=ifelse(data$povrate60>59.1984,1,0)
-#bin the data by poverty rate, every 1%
-data$bin = round(data$povrate60)
-data$Z=as.factor(data$Z)
-summary(data)
+#paper uses 10 bins, defined by cut(data$povrate60,10)
+bins = c(15.1,23,30.8,38.6,46.4,54.1,61.9,69.7,77.5,100) #UB of each bin
+for (i in 1:length(bins)){
+  data$bin[data$povrate60>bins[i]]=bins[i]
+}
 data%>%
 mutate(Z=as.factor(Z))%>%
 filter(!is.na(bin))%>%
 group_by(bin,Z)%>%
 summarize(AvgMortality=mean(mort_age59_related_postHS,na.rm=TRUE),n=n())%>%
-ggplot(aes(bin,AvgMortality, color=Z))+geom_point(aes(size=n),alpha=0.25)+geom_smooth(linewidth=2)+
-geom_vline(xintercept=59.1984)+xlab("1960 Poverty rate (binned)")
+ggplot(aes(bin,AvgMortality, color=Z))+
+geom_point(aes(size=n),alpha=0.25)+geom_smooth(linewidth=2, method = lm)+
+geom_vline(xintercept=54.1)+xlab("1960 Poverty rate (binned)")+ #change due to binning
+ggtitle("Plot of Regression Discontinuity Design of\nPost-Head Start child mortality (Ludwig & Miller, 2007)")+
+ylab("Average Mortality Rate")
 ```
 
 ```{r}
-#library(rdrobust)
-#rd = rdrobust(data$mort_age59_related_postHS, data$Z)
+#using the model in the paper
+#Yc = b0  + b1(Pc - P300) + a*Gc+ b2Gc(Pc -P300)+ vc
+data$povrate_diff = data$povrate60-59.1984
+summary(lm(mort_age59_related_postHS~povrate_diff + Z + Z*povrate_diff,data=data))
 ```
 
 
@@ -69,3 +68,7 @@ Critically evaluate the result--what does it mean? Do you believe it? Why or why
 
 ## Solution
 
+The results shows that, first, there is the discontinuity in the average mortality rate given different poverty rate.
+Second, the estimate here are closed to the paper, that is the effect of headstart program on child mortality is in a negative way.
+Intuitively, this should not happen, because the headstart program is designed to help children in poverty. That means, there might be
+some confounding factors that affect the result. For example, the poverty rate might be correlated with other factors that affect the child mortality rate at this age range.
