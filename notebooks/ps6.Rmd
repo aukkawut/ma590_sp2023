@@ -1,0 +1,71 @@
+---
+title: "Homework 6"
+subtitle: "MA 590 Special Topics: Causal Inference"
+author: "Aukkawut Ammartayakun"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+    pdf_document:
+        includes:
+            in_header: "preamble.tex"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+data = read.csv("headstart.csv")
+library(rdd)
+
+## these are for plotting the RDD
+library(dplyr)
+library(ggplot2)
+```
+
+Take a look at [`Ludwig & Miller 2007.pdf`](https://canvas.wpi.edu/courses/46357/files/5441391?wrap=1). You don't  need to read all 50 pages--for our purposes sections II, V, and VII are the most important.
+
+# Problem 1
+
+Answer Sue Dynarski's 3 questions, in relation to Ludwig & Miller (2007): What is the causal question? What is the ideal experiment? What is the identification strategy? 
+
+## Solution
+
+- The causal question is whether Head Start program has an effect on child mortality.
+- The ideal experiment is to randomly assign children to Head Start program and non-Head Start program.
+- The identification strategy is to use the difference-in-difference method.
+
+# Problem 2
+Following their general approach, use the dataset [`headstart.csv`](https://canvas.wpi.edu/courses/46357/files/5441395/download?download_frd=1), (more-or-less) replicate their results for Post-Head Start child mortality ages 5-9 (`mort_age59_related_postHS` in the dataset). Don't worry about getting exactly the same answer or model specification as in the paper, but if it's in an entirely different ballpark then maybe something went wrong. 
+
+## Solution
+
+```{r}
+#scatter plot of poverty rate against child mortality rate
+plot(data$povrate60, data$mort_age59_related_postHS, xlab = "Poverty Rate", ylab = "Child Mortality Rate", main = "Scatter Plot of Poverty Rate against Child Mortality Rate")
+```
+
+```{r}
+#now, on our data
+#cutoff at poverty rate >59.1984
+data$Z=ifelse(data$povrate60>59.1984,1,0)
+#bin the data by poverty rate, every 1%
+data$bin = round(data$povrate60)
+data$Z=as.factor(data$Z)
+summary(data)
+data%>%
+mutate(Z=as.factor(Z))%>%
+filter(!is.na(bin))%>%
+group_by(bin,Z)%>%
+summarize(AvgMortality=mean(mort_age59_related_postHS,na.rm=TRUE),n=n())%>%
+ggplot(aes(bin,AvgMortality, color=Z))+geom_point(aes(size=n),alpha=0.25)+geom_smooth(linewidth=2)+
+geom_vline(xintercept=59.1984)+xlab("1960 Poverty rate (binned)")
+```
+
+```{r}
+#library(rdrobust)
+#rd = rdrobust(data$mort_age59_related_postHS, data$Z)
+```
+
+
+# Problem 3
+Critically evaluate the result--what does it mean? Do you believe it? Why or why not?
+
+## Solution
+

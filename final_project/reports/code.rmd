@@ -103,14 +103,52 @@ c2st <- function(X, y, bf = 1000){
     y_pred <- predict(model, X_test, type = "response")
     y_pred <- ifelse(y_pred > 0.5, 1, 0)
     emp_loss <- mean(y_pred != y_test)
+    #permutation test
+    pval <- 0
+    for (i in 1:bf){
+        y_test_perm <- sample(y_test)
+        y_pred_perm <- predict(model, X_test, type = "response")
+        y_pred_perm <- ifelse(y_pred_perm > 0.5, 1, 0)
+        emp_loss_perm <- mean(y_pred_perm != y_test_perm)
+        if (emp_loss_perm > emp_loss){
+            pval <- pval + 1
+        }
+    }
+    pval <- pval/bf
+    return(list(emp_loss = emp_loss, pval = pval))
+    #return(list(emp_loss = emp_loss))
+}
+```
+
+```{r c2st_DL, include=FALSE}
+# C2ST with deep learning
+library(keras)
+c2st_DL <- function(X, y, bf = 1000){
+    # make sure X is dataframe
+    X <- as.data.frame(X)
+    # split data into training and testing sets
+    g(X_train, X_test, y_train, y_test) %=% ttsplit(X, y)
+    # fit logistic regression model
+    model <- keras_model_sequential() %>%
+        layer_dense(units = 1, activation = 'sigmoid', input_shape = ncol(X_train))
+    model %>% compile(
+        loss = 'binary_crossentropy',
+        optimizer = 'adam',
+        metrics = 'accuracy'
+    )
+    model %>% fit(X_train, y_train, epochs = 100, verbose = 0)
+    y_pred <- model %>% predict_classes(X_test)
+    emp_loss <- mean(y_pred != y_test)
     #p-val, 2 sided = 2*min(pval, 1-pval)
     #pval = P(T > t| H0)
     #T~Binomial(n, 0.5)
     #P(T > t| H0) = P(T>t and H0)/P(H0)
-
     #return(list(emp_loss = emp_loss, pval = pval))
     return(list(emp_loss = emp_loss))
 }
+```
+
+```{r c2st_DL2, include=FALSE}
 ```
 
 ## Testing the Algorithm
@@ -118,14 +156,14 @@ c2st <- function(X, y, bf = 1000){
 ::: columns
 
 :::: column
-```{r}
+```{r, comment=""}
 set.seed(590)
 # generate random multivariate gaussian data
 n <- 1000
 d <- 2
 X <- matrix(rnorm(n*d), n, d)
 y <- c(rep(0, n/2), rep(1, n/2))
-c(c2st(X, y)$emp_loss)
+c(c2st(X, y)$emp_loss, c2st(X,y)$pval)
 ```
 ::::
 
@@ -134,7 +172,7 @@ c(c2st(X, y)$emp_loss)
 # scatter plot of the data colored by the class 
 # class 0: white, class 1: red
 z <- c(rep(3, n/2), rep(4, n/2))
-plot(X, col = z, pch = 19, cex = 0.2)
+plot(X, col = z, pch = 19, cex = 0.4)
 box(col="white")
 axis(1, col="white", col.ticks="white", col.axis="white", cex.axis=1)
 axis(2, col="white", col.ticks="white", col.axis="white", cex.axis=1)
@@ -150,34 +188,29 @@ mtext("axis 2", side=2, line=3, col="white", cex=1)
 It is the *impossible* classification problem. Thus, the result should be close to near-chance level.
 
 ## Testing the Algorithm
+
 ::: columns
 
 :::: column
-```{r}
+```{r, comment=""}
 set.seed(590)
 # generate two dataset: two gaussians
-n <- 1000
-d <- 2
-X0 <- matrix(rnorm(n*d, 1,0.5), n, d)
-X1 <- matrix(rnorm(n*d, -1,0.5), n, d)
-# combine two dataset
-X <- rbind(X0, X1)
+n <- 5000
+d <- 3
+X0 <- matrix(rnorm(n*d, -1,0.8), n, d)
+X1 <- matrix(rnorm(n*d, 1,1), n, d)
 y <- c(rep(0, n), rep(1, n))
-c(c2st(X, y)$emp_loss)
+c(c2st(rbind(X0, X1), y)$emp_loss, c2st(rbind(X0, X1), y)$pval)
 ```
 ::::
 
 :::: column
-```{r plot2, echo=FALSE}
-# scatter plot of the data colored by the class 
-# class 0: white, class 1: red
+```{r plot3, echo=FALSE}
+# 3d scatter plot of the data colored by the class
+# class 0: green, class 1 blue
+library(scatterplot3d)
 z <- c(rep(3, n), rep(4, n))
-plot(X, col = z, pch = 19, cex = 0.2)
-box(col="white")
-axis(1, col="white", col.ticks="white", col.axis="white", cex.axis=1)
-axis(2, col="white", col.ticks="white", col.axis="white", cex.axis=1)
-mtext("axis 1", side=1, line=3, col="white", cex=1)
-mtext("axis 2", side=2, line=3, col="white", cex=1)
+scatterplot3d(rbind(X0, X1), color = z, pch = 19, cex.symbol = 0.1 ,grid=TRUE, box=FALSE, angle = 45, col.axis = "white", col.grid= "white", col.lab= "white", xlab = "axis 1", ylab = "axis 2", zlab = "axis 3")
 ```
 ::::
 
@@ -185,7 +218,40 @@ mtext("axis 2", side=2, line=3, col="white", cex=1)
 ```{=latex}
 \pause
 ```
-Now that it is not impossible, the test statistics will diverge from the near-chance level.
+
+Test statistic diverges from near-chance level as there is an exist of "linear" decision boundary. 
+The dimensionality problem in homogenity test is solved.
+
+**Question**: Does changing from GLM to other models increases (widen the range of) the testing power, $\beta$?
+
+
+## Testing the Algorithm
+
+::: columns
+
+:::: column
+```{r, comment=""}
+
+```
+
+::::
+
+:::: column
+```{r plot4, echo=FALSE}
+# 3d scatter plot of the data colored by the class
+# class 0: green, class 1 blue
+z <- c(rep(3, n), rep(4, n))
+scatterplot3d(rbind(X0, X1), color = z, pch = 19, cex.symbol = 0.1 ,grid=TRUE, box=FALSE, angle = 45, col.axis = "white", col.grid= "white", col.lab= "white", xlab = "axis 1", ylab = "axis 2", zlab = "axis 3")
+```
+
+::::
+
+:::
+
+
+## Comparison to Maximum Mean Discrepancy
+
+
 
 ## Use C2ST on Causal Inference
 
