@@ -93,7 +93,7 @@ ttsplit <- function(X,y, p = 0.8){
 
 ```{r c2st, include=FALSE}
 # based on https://gist.github.com/oddskool/409018f61d432f10fe00223e2b93cb51
-c2st <- function(X, y, bf = 1000){
+c2st <- function(X, y, bf = 1000, echo = FALSE){
     # make sure X is dataframe
     X <- as.data.frame(X)
     # split data into training and testing sets
@@ -103,19 +103,27 @@ c2st <- function(X, y, bf = 1000){
     y_pred <- predict(model, X_test, type = "response")
     y_pred <- ifelse(y_pred > 0.5, 1, 0)
     emp_loss <- mean(y_pred != y_test)
-    #permutation test
-    pval <- 0
-    for (i in 1:bf){
-        y_test_perm <- sample(y_test)
-        y_pred_perm <- predict(model, X_test, type = "response")
-        y_pred_perm <- ifelse(y_pred_perm > 0.5, 1, 0)
-        emp_loss_perm <- mean(y_pred_perm != y_test_perm)
-        if (emp_loss_perm > emp_loss){
-            pval <- pval + 1
-        }
+    #bootstrap to get p-value
+    losses <- rep(NA, bf)
+    for(i in 1:bf){
+        # sample with replacement
+        sample <- sample(1:nrow(X_train), size = nrow(X_train), replace = TRUE)
+        # fit logistic regression model
+        model <- glm(y_train[sample] ~ ., data = X_train[sample,], family = binomial(link = "logit"))
+        y_pred <- predict(model, X_test, type = "response")
+        y_pred <- ifelse(y_pred > 0.5, 1, 0)
+        losses[i] <- mean(y_pred != y_test)
     }
-    pval <- pval/bf
-    return(list(emp_loss = emp_loss, pval = pval))
+    #t-test
+    tstat = (mean(losses) - 0.5)/sd(losses)
+    pval <- 2*pt(-abs(tstat), df = bf - 1)
+    if(echo){
+        print(paste0("Empirical loss: ", emp_loss), quote = FALSE)
+        print(paste0("p-value: ", pval), quote = FALSE)
+    }
+    else{
+      return(list(emp_loss = emp_loss, pval = pval))
+    }
     #return(list(emp_loss = emp_loss))
 }
 ```
@@ -139,12 +147,10 @@ c2st_DL <- function(X, y, bf = 1000){
     model %>% fit(X_train, y_train, epochs = 100, verbose = 0)
     y_pred <- model %>% predict_classes(X_test)
     emp_loss <- mean(y_pred != y_test)
-    #p-val, 2 sided = 2*min(pval, 1-pval)
-    #pval = P(T > t| H0)
-    #T~Binomial(n, 0.5)
-    #P(T > t| H0) = P(T>t and H0)/P(H0)
-    #return(list(emp_loss = emp_loss, pval = pval))
-    return(list(emp_loss = emp_loss))
+    #p-val from t-test, different from 1/2 with standard error of sqrt(4n)
+    t_stat = (emp_loss - 0.5)/sqrt(4*nrow(X))
+    pval <- 2*pt(-abs(t_stat), df = nrow(X) - 1)
+    return(list(emp_loss = emp_loss, pval = pval))
 }
 ```
 
@@ -163,7 +169,7 @@ n <- 1000
 d <- 2
 X <- matrix(rnorm(n*d), n, d)
 y <- c(rep(0, n/2), rep(1, n/2))
-c(c2st(X, y)$emp_loss, c2st(X,y)$pval)
+c2st(X, y, echo = TRUE)
 ```
 ::::
 
@@ -200,7 +206,7 @@ d <- 3
 X0 <- matrix(rnorm(n*d, -1,0.8), n, d)
 X1 <- matrix(rnorm(n*d, 1,1), n, d)
 y <- c(rep(0, n), rep(1, n))
-c(c2st(rbind(X0, X1), y)$emp_loss, c2st(rbind(X0, X1), y)$pval)
+c2st(rbind(X0, X1), y, echo = TRUE)
 ```
 ::::
 
