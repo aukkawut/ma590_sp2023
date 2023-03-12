@@ -7,6 +7,7 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{indentfirst}
+\usepackage{bm}
 %define theorem environments
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
@@ -16,7 +17,8 @@
 \newtheorem{example}{Example}
 \newtheorem{remark}{Remark}
 \newtheorem{assumption}{Assumption}
-\title{Causality with Deep Learning}
+\title{
+    Exploiting the Classification Algorithm for Robust Multidimensional Homogeneity Test in Causal Inference}
 \author{Proposal\\Aukkawut Ammartayakun\\MA 590 Special Topics: Causal Inference}
 \date{Spring 2023}
 
@@ -40,10 +42,18 @@
 
 
 \section{Introduction}
-Traditionally, to determine the causal relationship, one must perform the randomized test to 
-determine the causality of the variables. However, alternatively, one can create a causal model 
-to determine the causal relationship. Both of which can be exploited with deep learning. 
-However, the hypothesis testing exploitation will be explored
+Homogeneity is one of the crucial assumptions in the causal inference field. 
+Traditionally, this can be test with hypothesis testing like the Kolmogorov-Smirnov test. 
+However, those test has a limitation on the dimension of the data.
+This work challenges that limitation by looking at this problem from a different perspective. 
+Recall that hypothesis testing is essentially the classification problem of whether one has statistical evidence to reject the null hypothesis or not. 
+Semantically, they both are different approaches but those problems are equivalent in the sense that we can have the classification functions 
+$f:\mathcal{D}\rightarrow [0,1]$ such that $f(x,y)$ for $(x,y)\in\mathcal{X} \supseteq \mathcal{D}$ reflecting the probability of rejecting the null hypothesis $H_0: X = Y$ 
+for paired data $(x,y)$ in the data space $\mathcal{X}$ which now, the $p$-value can be estimated from $f$ and the decision can be done with thresholding.
+
+This work will explore the possibility of exploiting the classification algorithm for robust multidimensional homogeneity test with the application in causal inference.
+First, this work will explore the known method for homogeneity test in high dimensional space like exploiting $f$-divergence, maximum mean discrepancy, C2ST, etc. 
+Then, the proposed method will be analyzed and tested in comparison to the former methods.
 \subsection{Hypothesis testing exploitation}
 As the process of hypothesis testing involves evaluating the test statistics and using that 
 to find the critical region under the distribution. However, that can be simplified, hopefully, 
@@ -52,6 +62,17 @@ The transformation of the data into its representation form, i.e., embedding mig
 the underlying causal relation. The use of a machine learning model in substitution for 
 hypothesis testing for causal inference will be explored, along with the analysis of the power 
 of testing using a classification model.
+\subsection{Logistic Regression Analysis}
+Let say we have the data space $\mathcal{X}$ and the paired dataset $\mathcal{D} \subseteq \mathcal{X}$. The goal of this is to infers to one paired sample data
+$(x,y) \in \mathcal{D}$ whether classify the rejection of the null hypothesis $H_0: X = Y$. For the convience, let assume that $x$ and $y$ are the same dimension,
+the probability of rejecting the null hypothesis (that is, $X$ and $Y$ are not the same distribution) for a given paired sample data vectors $(x,y)$ can be determined.
+
+For the naive case, let assume that $X$ and $Y$ are linearly separateable. That is, there exists a hyperplane $H$ such that $x \in H$ if and only if $y \in H$. 
+Then, the probability of rejecting the null hypothesis can be determined by the distance of the paired sample data vectors $(x,y)$ to the hyperplane $H$.
+\begin{equation}
+    P(H_0 \mid (x,y)) = \frac{1}{1 + \exp(-\alpha d(x,y))},
+\end{equation}
+where $\alpha$ is the hyperparameter that controls the steepness of the sigmoid function and $d(x,y)$ is the distance of the paired sample data vectors $(x,y)$ to the hyperplane $H$.
 \section{Dataset}
 ASSISTments dataset\cite{assistment} will be explored in various aspects.
 \section{Proposed Method (Roughly)}
@@ -91,7 +112,7 @@ With this, one can exploit the $f$-divergence in order for semiparametric homoge
 \subsection{Prove that the model itself have the same classification power as the hypothesis testing}
 In this path, one can easily show empirically that the type II error rate is the same as the 
 power of the test. However, the problem arise when the prove is needed to be done analytically, 
-which is the main goal of this project.
+which is the main goal of this project. 
 
 \bibliographystyle{acm} % We choose the "plain" reference style
 \bibliography{citation.bib} % Entries are in the refs.bib file

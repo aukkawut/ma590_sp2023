@@ -106,16 +106,16 @@ c2st <- function(X, y, bf = 1000, echo = FALSE){
     #bootstrap to get p-value
     losses <- rep(NA, bf)
     for(i in 1:bf){
-        # sample with replacement
-        sample <- sample(1:nrow(X_train), size = nrow(X_train), replace = TRUE)
+        # remake training and testing sets
+        g(X_train, X_test, y_train, y_test) %=% ttsplit(X, y)
         # fit logistic regression model
-        model <- glm(y_train[sample] ~ ., data = X_train[sample,], family = binomial(link = "logit"))
+        model <- glm(y_train ~ ., data = X_train, family = binomial(link = "logit"))
         y_pred <- predict(model, X_test, type = "response")
         y_pred <- ifelse(y_pred > 0.5, 1, 0)
         losses[i] <- mean(y_pred != y_test)
     }
     #t-test
-    tstat = (mean(losses) - 0.5)/sd(losses)
+    tstat = (mean(losses) - 0.5)/(sd(losses))
     pval <- 2*pt(-abs(tstat), df = bf - 1)
     if(echo){
         print(paste0("Empirical loss: ", emp_loss), quote = FALSE)
