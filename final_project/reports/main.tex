@@ -42,17 +42,21 @@
 
 
 \section{Introduction}
-Homogeneity is one of the crucial assumptions in the causal inference field. 
+
+The simple but effective way to quickly estimate whether the average treatment of two treatments are zero or not on the randomized controlled experiment (RCE) is to perform hypothesis testing. 
+Specifically, the fisherian approach where the null hypothesis on the RCE is that we can't tell the difference between the two treatments which can be simplified into the homogeneity test.
 Traditionally, this can be test with hypothesis testing like the Kolmogorov-Smirnov test. 
-However, those test has a limitation on the dimension of the data.
+However, those test has a limitation on the dimension of the data. For example, to consider the difference between two text generated models in terms of the 
+students performance after receiving the hint from those two models, it is hard to do so with the traditional hypothesis testing, let alone any other method that does not involves with machine learning.
+
 This work challenges that limitation by looking at this problem from a different perspective. 
 Recall that hypothesis testing is essentially the classification problem of whether one has statistical evidence to reject the null hypothesis or not. 
 Semantically, they both are different approaches but those problems are equivalent in the sense that we can have the classification functions 
 $f:\mathcal{D}\rightarrow [0,1]$ such that $f(x,y)$ for $(x,y)\in\mathcal{X} \supseteq \mathcal{D}$ reflecting the probability of rejecting the null hypothesis $H_0: X = Y$ 
 for paired data $(x,y)$ in the data space $\mathcal{X}$ which now, the $p$-value can be estimated from $f$ and the decision can be done with thresholding.
 
-This work will explore the possibility of exploiting the classification algorithm for robust multidimensional homogeneity test with the application in causal inference.
-First, this work will explore the known method for homogeneity test in high dimensional space like exploiting $f$-divergence, maximum mean discrepancy, C2ST, etc. 
+This work will explore the possibility of exploiting the classification algorithm for robust multidimensional homogeneity test (naive way to test the difference between two treatments) with the application in causal inference.
+First, this work will explore the known method for homogeneity test in high dimensional space like exploiting $f$-divergence\cite{fdiv}, maximum mean discrepancy\cite{mmd}, C2ST\cite{c2st}, etc. 
 Then, the proposed method will be analyzed and tested in comparison to the former methods.
 \subsection{Hypothesis testing exploitation}
 As the process of hypothesis testing involves evaluating the test statistics and using that 
@@ -62,57 +66,40 @@ The transformation of the data into its representation form, i.e., embedding mig
 the underlying causal relation. The use of a machine learning model in substitution for 
 hypothesis testing for causal inference will be explored, along with the analysis of the power 
 of testing using a classification model.
-\subsection{Logistic Regression Analysis}
-Let say we have the data space $\mathcal{X}$ and the paired dataset $\mathcal{D} \subseteq \mathcal{X}$. The goal of this is to infers to one paired sample data
-$(x,y) \in \mathcal{D}$ whether classify the rejection of the null hypothesis $H_0: X = Y$. For the convience, let assume that $x$ and $y$ are the same dimension,
-the probability of rejecting the null hypothesis (that is, $X$ and $Y$ are not the same distribution) for a given paired sample data vectors $(x,y)$ can be determined.
 
-For the naive case, let assume that $X$ and $Y$ are linearly separateable. That is, there exists a hyperplane $H$ such that $x \in H$ if and only if $y \in H$. 
-Then, the probability of rejecting the null hypothesis can be determined by the distance of the paired sample data vectors $(x,y)$ to the hyperplane $H$.
-\begin{equation}
-    P(H_0 \mid (x,y)) = \frac{1}{1 + \exp(-\alpha d(x,y))},
-\end{equation}
-where $\alpha$ is the hyperparameter that controls the steepness of the sigmoid function and $d(x,y)$ is the distance of the paired sample data vectors $(x,y)$ to the hyperplane $H$.
+
 \section{Dataset}
-ASSISTments dataset\cite{assistment} will be explored in various aspects.
-\section{Proposed Method (Roughly)}
-\subsection{Hypothesis testing exploitation}
+Food.com\cite{food} recipe and the rating will be used as the dataset. The randomized experiment in this case is to test whether there is the difference in rating
+in wording of the recipe between the treatment group and the controlled group. The treatment group is the recipe that has the word "healthy" in it, and the controlled group is the recipe that does not have the word "healthy" in it.
+
+The key (derived) variables here are:
 \begin{enumerate}
-    \item Explore the hypothesis testing and analyze the classification problem as the 
-    statistical test to show the feasibility of the method and analyze the tradeoff of this 
-    method.
-    \item Comparing the traditional method of determining the causal relationship with the 
-    deep learning model mainly aims to classify whether to reject the null hypothesis 
-    (whether A has an effect on B) or not.
+    \item Description: The description of the recipe
+    \item Rating: The rating of the recipe
+    \item Healthy: The indicator of whether the recipe has the word "healthy" in it or not
 \end{enumerate}
+In this case the healthy variable is an instrument variable to this randomized experiment.
 \section{Goal}
 
 To apply the exploited homogenity test to test whether the result from the treatment group and outcome group
 are homogenious or not. If the result is not homogenious, then the treatment group has an effect on the outcome group.
-\section{Literature Review}
+%\section{Literature Review}
 
-\subsection{Explotation on $f$-divergence}
-
-\begin{definition}
-Let $p(x)$ and $q(x)$ be two probability distributions such that $q(x) > 0$ for all $x$ and 
-let $f$ be a function that is convex and satisfies $f(0)=0$. Then, $f$-divergence is defined as
-\begin{equation}
-    D_f(p||q) = \int p(x) f\left(\frac{p(x)}{q(x)}\right) dx
-\end{equation}
-\end{definition}
-One can see that $f$-divergence family would include the KL divergence, Jensen-Shannon divergence, etc.
-With this, one can exploit the $f$-divergence in order for semiparametric homogenity test.
-
-\subsection{Homogenity test}
+%\subsection{Homogenity test}
 
 
-\section{Approach}
+\section{Proposed Approach}
+In the similar manner to \cite{c2st}, the proposed method will be to use the classification algorithm to test the homogenity of the treatment group and the outcome group.
+However, instead of later use $t$-test on the test statistic that derived from the classification model, what if the model itself return $p$-value? As discussed on the introduction,
+the hypothesis testing is essentially the classification problem of whether one has statistical evidence to reject the null hypothesis or not. 
 
-\subsection{Prove that the transformation of embedding is sufficient for test statistic}
-\subsection{Prove that the model itself have the same classification power as the hypothesis testing}
-In this path, one can easily show empirically that the type II error rate is the same as the 
-power of the test. However, the problem arise when the prove is needed to be done analytically, 
-which is the main goal of this project. 
+In this task, the aggregated embedding which is essentially similar to the sufficient statistic, however, it is just a summary (i.e., the moment) of the all embedding in each group will be used and pass that through the classification model 
+like siamese network\cite{siamese} which returns $p$-value as its confidence in rejecting the null hypothesis in homogeneity test.
+
+The text embedding can be generated using the pre-trained model like BERT\cite{bert}. Different aggregation will be explored, this includes the mean, median, and the max pooling.
+
+The performance and test power of the proposed method will be compared to the other high dimensional homogenity test like the MMD\cite{mmd} and the C2ST\cite{c2st} test.
+
 
 \bibliographystyle{acm} % We choose the "plain" reference style
 \bibliography{citation.bib} % Entries are in the refs.bib file

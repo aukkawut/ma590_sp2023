@@ -1,19 +1,36 @@
-@inproceedings{assistment,
-author = {Wang, Yutao and Heffernan, Neil T. and Heffernan, Cristina},
-title = {Towards Better Affect Detectors: Effect of Missing Skills, Class Features and Common Wrong Answers},
-year = {2015},
-isbn = {9781450334174},
-publisher = {Association for Computing Machinery},
-address = {New York, NY, USA},
-url = {https://doi.org/10.1145/2723576.2723618},
-doi = {10.1145/2723576.2723618},
-abstract = {The well-studied Baker et al., affect detectors on boredom, frustration, confusion and engagement concentration with ASSISTments dataset were used to predict state tests scores, college enrollment, and even whether a student majored in a STEM field. In this paper, we present three attempts to improve upon current affect detectors. The first attempt analyzed the effect of missing skill tags in the dataset to the accuracy of the affect detectors. The results show a small improvement after correctly tagging the missing skill values. The second attempt added four features related to student classes for feature selection. The third attempt added two features that described information about student common wrong answers for feature selection. Result showed that two out of the four detectors were improved by adding the new features.},
-booktitle = {Proceedings of the Fifth International Conference on Learning Analytics And Knowledge},
-pages = {31–35},
-numpages = {5},
-keywords = {common wrong answers, class features, missing skill, affect detection, learning analytics, measurement},
-location = {Poughkeepsie, New York},
-series = {LAK '15}
+@inproceedings{food,
+    title = "Generating Personalized Recipes from Historical User Preferences",
+    author = "Majumder, Bodhisattwa Prasad  and
+      Li, Shuyang  and
+      Ni, Jianmo  and
+      McAuley, Julian",
+    booktitle = "Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP)",
+    month = nov,
+    year = "2019",
+    address = "Hong Kong, China",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/D19-1613",
+    doi = "10.18653/v1/D19-1613",
+    pages = "5976--5982",
+    abstract = "Existing approaches to recipe generation are unable to create recipes for users with culinary preferences but incomplete knowledge of ingredients in specific dishes. We propose a new task of personalized recipe generation to help these users: expanding a name and incomplete ingredient details into complete natural-text instructions aligned with the user{'}s historical preferences. We attend on technique- and recipe-level representations of a user{'}s previously consumed recipes, fusing these {`}user-aware{'} representations in an attention fusion layer to control recipe text generation. Experiments on a new dataset of 180K recipes and 700K interactions show our model{'}s ability to generate plausible and personalized recipes compared to non-personalized baselines.",
+}
+@article{mmd,
+  author  = {Arthur Gretton and Karsten M. Borgwardt and Malte J. Rasch and Bernhard Sch{{\"o}}lkopf and Alexander Smola},
+  title   = {A Kernel Two-Sample Test},
+  journal = {Journal of Machine Learning Research},
+  year    = {2012},
+  volume  = {13},
+  number  = {25},
+  pages   = {723-773},
+  url     = {http://jmlr.org/papers/v13/gretton12a.html}
+}
+@misc{fdiv,
+      title={$f$-divergence estimation and two-sample homogeneity test under semiparametric density-ratio models}, 
+      author={Takafumi Kanamori and Taiji Suzuki and Masashi Sugiyama},
+      year={2010},
+      eprint={1010.4945},
+      archivePrefix={arXiv},
+      primaryClass={stat.ML}
 }
 @inproceedings{
 c2st,
@@ -22,4 +39,18 @@ author={David Lopez-Paz and Maxime Oquab},
 booktitle={International Conference on Learning Representations},
 year={2017},
 url={https://openreview.net/forum?id=SJkXfE5xx}
+}
+@article{bert,
+  title={Bert: Pre-training of deep bidirectional transformers for language understanding},
+  author={Devlin, Jacob and Chang, Ming-Wei and Lee, Kenton and Toutanova, Kristina},
+  journal={arXiv preprint arXiv:1810.04805},
+  year={2018}
+}
+@article{siamese,
+	title = {Siamese {Neural} {Networks} for {One}-shot {Image} {Recognition}},
+	abstract = {The process of learning good features for machine learning applications can be very computationally expensive and may prove difﬁcult in cases where little data is available. A prototypical example of this is the one-shot learning setting, in which we must correctly make predictions given only a single example of each new class. In this paper, we explore a method for learning siamese neural networks which employ a unique structure to naturally rank similarity between inputs. Once a network has been tuned, we can then capitalize on powerful discriminative features to generalize the predictive power of the network not just to new data, but to entirely new classes from unknown distributions. Using a convolutional architecture, we are able to achieve strong results which exceed those of other deep learning models with near state-of-the-art performance on one-shot classiﬁcation tasks.},
+	language = {en},
+	author = {Koch, Gregory and Zemel, Richard and Salakhutdinov, Ruslan},
+	note = {Proceedings of the 32nd International Conference on Machine
+Learning},
 }
