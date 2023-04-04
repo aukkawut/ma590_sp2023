@@ -1,0 +1,115 @@
+---
+title: "Homework 7"
+subtitle: "MA 590 Special Topics: Causal Inference"
+author: "Aukkawut Ammartayakun"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+    pdf_document:
+        includes:
+            in_header: "preamble.tex"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=70),tidy=TRUE)
+data = read.csv("covidProcessed.csv")
+
+## these are for plotting the RDD
+library(optmatch) ## for matching
+library(RItools) ## for covariate balance
+library(estimatr) ## for estimation
+library(tidyverse)
+library(arm)
+source('matchingFunctions.r')
+```
+
+In May 2020 many US counties implemented a mask mandate to slow the spread of COVID-19.
+
+The dataset `covidProcessed.csv` contains demographic data on US counties, along with covid infection and death totals and per-capita rates for April, 2020 (`aprilInfec`, `aprilDeaths`, `aprilInfecPC`, and `aprilDeathsPC`, respectively), covid death totals and per-capita rates for June, 2020 (`juneDeaths`, `juneDeathsPC`) and whether the county implemented a mask mandate in May 2020 (Z).
+
+# Problem 1
+
+Use propensity score matching with this dataset to estimate the effect of a county's decision to impose a mask mandate (Z) on its per-capita covid death rate in June (`juneDeathsPC`). You may use all of the other variables (except `juneDeaths`) as covariates. Be sure to assess covariate balance before estimating effects. You may estimate the ATT, ATE, or another weighted average effect. 
+
+## Solution
+
+```{r}
+lm_robust(juneDeathsPC~Z,data=data)
+# covariate balance
+(bal=balanceTest(Z~percentNoHS+percentBA+pov18+unemp18+age017+age65plus+black+asian+hisp+white+AmInd+dem2party+aprilDeathsPC+aprilInfecPC,data=data))
+plot(bal)
+psMod1 <- glm(Z~percentNoHS+percentBA+pov18+unemp18+age017+age65plus+black+asian+hisp+white+AmInd+dem2party+aprilDeathsPC+aprilInfecPC,
+             data = data,family=binomial(logit))
+summary(psMod1)
+plotPS(psMod1)
+
+dist=match_on(psMod1,caliper=0.2,data=data)
+fullCaliper <- fullmatch(dist,data=data)
+summary(fullCaliper,psMod1)
+plotMatch(fullCaliper,mod=psMod1)
+(bal=balanceTest(Z~percentNoHS+percentBA+pov18+unemp18+age017+age65plus+black+asian+hisp+white+AmInd+dem2party+aprilDeathsPC+aprilInfecPC+strata(fullCaliper),data=data))
+plot(bal)
+
+#estimate the effect
+lm_robust(juneDeathsPC~Z+predict(psMod1,type='r'),data=data,fixed_effects = ~fullCaliper)
+```
+
+
+# Problem 2
+The IPW estimator for the ATT is 
+$$
+\hat{\tau}^{\text{ATT}}_{\text{IPW}} = \frac{1}{n_1} \sum_{i} Y_i\left(Z_i-\frac{e(X_i)}{1-e(X_i)}(1-Z_i)\right)
+$$
+where $e(X_i)$ is subject i's propensity score. 
+
+a) Show that if strong ignorability holds and propensity scores are known exactly--i.e. if $e(X_i) = \Pr(Z_i=1)$--then
+$$
+\mathbb{E}\left[\hat{\tau}^{\text{ATT}}_{\text{IPW}}\right] = \frac{1}{n_1} \sum_{i} e(X_i)\tau_i = \mathbb{E}[\tau | Z=1] 
+$$
+
+b) Use the propensity scores from (1) and IPW to estimate the effect of mask mandates on June 2020 covid death rates for counties that adopted them. 
+
+## Solution
+
+a)
+
+We want to show that if strong ignorability holds and propensity scores are known exactly, then
+$$
+\mathbb{E}\left[\hat{\tau}^{\text{ATT}}_{\text{IPW}}\right] = \frac{1}{n_1} \sum_{i} e(X_i)\tau_i = \mathbb{E}[\tau | Z=1] 
+$$
+
+Let $Y_i$ be the outcome of interest, $Z_i$ be the treatment, $X_i$ be the covariates, and $e(X_i)$ be the propensity score. We have
+$$
+\mathbb{E}\left[\hat{\tau}^{\text{ATT}}_{\text{IPW}}\right] = \frac{1}{n_1} \mathbb{E}\left[\sum_{i} Y_iZ_i- Y_i\frac{e(X_i)}{1-e(X_i)}(1-Z_i)\right]
+$$
+Linearlize the expectation, we will find that the first term $\mathbb{E}\left[Y_iZ_i\right]$ is $n_1e(X_i)\mathbb{E}[y(1)]$ as shown in the lecture.
+
+Recall that ATT is defined as
+$$
+\tau = \frac{1}{n_1} \sum_i y_i(1) - y_i(0)
+$$
+In the similar manner, we can show that the second term, $\mathbb{E}\left[Y_i\frac{e(X_i)}{1-e(X_i)}(1-Z_i)\right]$ is $n_1e(X_i)\mathbb{E}[y(0)]$ by letting $Y_i = y_i(1)Z_i + y_i(0)(1-Z_i)$ and $\mathbb{E}[1-Z_i] = 1-e(X_i)$. Thus, 
+the result is now as desired.
+
+
+b)
+```{r}
+#ipw
+obs=data%>%
+  mutate(match=fullCaliper)%>%
+  group_by(match)%>%
+  mutate(
+    n1=sum(Z),
+    n0=sum(1-Z),
+    wols=n1*n0/(n1+n0),
+    w=n1/wols)%>%
+  ungroup()
+
+lm_robust(juneDeathsPC~Z+predict(psMod1,type='r'),data=obs,fixed_effects = ~match,weights=w)
+```
+
+# Problem 3
+Do you believe these estimates? Why or why not? Is there an observational design (perhaps with more/different observational data) that you would find more convincing? 
+
+## Solution
+
+Yes, because the result suggests that wearing mask actually negatively reduce the death rate. The longitunal data might help address the problem as there are more data point in time to compare rather than the instatenous difference.
